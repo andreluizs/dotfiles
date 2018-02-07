@@ -1,0 +1,45 @@
+[options]
+browser = google-chrome-stable
+clickable_url = true
+font = Inconsolata 18px
+
+[colors]
+# http://terminal.sexy/#Jh858fHxGx0e2Q55mN4A_V13A8vKRztr_s-HzMzGUFNU_iB7tuNU_qGCLfzebnGc_vGE-Pjy
+# special
+foreground      = #f1f1f1
+foreground_bold = #f1f1f1
+cursor          = #f1f1f1
+#background     = rgba(38, 31, 57, 0.9)
+background 	= #263238
+
+# black
+color0  = #1b1d1e
+color8  = #505354
+
+# red
+color1  = #d90e79
+color9  = #fe207b
+
+# green
+color2  = #98DE00
+color10 = #b6e354
+
+# yellow
+color3  = #fd5d77
+color11 = #fea182
+
+# blue
+color4  = #03cbca
+color12 = #2dfcde
+
+# magenta
+color5  = #473b6b
+color13 = #6e719c
+
+# cyan
+color6  = #fecf87
+color14 = #fef184
+
+# white
+color7  = #ccccc6
+color15 = #f8f8f2

@@ -1,9 +1,7 @@
 #include "/home/andre/.colors/high"
 
 
-;----------------------------------;
-;------------- HI-DPI -------------;
-;----------------------------------;
+! Hi-DPI
 Xcursor.size: 28
 Xft.dpi: 116
 Xft.autohint: 0
@@ -13,6 +11,26 @@ Xft.hinting: 1
 Xft.antialias: 1
 Xft.rgba: rgb
 
-;----------------------------------;
-;------------- ROFI ---------------;
-;----------------------------------;
+
+! Rofi
+rofi.modi: window,run,ssh
+
+rofi.color-enabled: true
+
+! Terminal
+rofi.terminal: termite
+
+! Window	    backgroud  border   separator
+rofi.color-window: #263238,   #263238, #263238
+
+! Normal
+rofi.color-normal: #263238, #d8dee8, #263238, #263238, #00bcd4
+
+! Ativo
+rofi.color-active: #263238, #b48ead, #263238, #263238, #93e5cc
+
+! Urgente
+rofi.color-urgent: #263238, #ebcb8b, #263238, #263238, #ebcb8b
+
+! Hide scroll
+rofi.hide-scrollbar: true

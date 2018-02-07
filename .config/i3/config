@@ -137,8 +137,9 @@ bindsym $mod+Shift+9 move container to workspace $w9
 bindsym $mod+Shift+0 move container to workspace $w10 
 
 # Alt+TAB & Alt+Shift+TAB	
-bindsym Mod1+Tab workspace next
-bindsym Mod1+Shift+Tab workspace prev
+# bindsym Mod1+Tab workspace next
+# bindsym Mod1+Shift+Tab workspace prev
+bindsym Mod1+Tab exec rofi -show window
 
 # Muda de Workspace.
 bindsym $mod+Control+Right workspace next
