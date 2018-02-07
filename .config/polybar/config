@@ -1,3 +1,7 @@
+
+;--------------------------------------------;
+;------------------- CORES ------------------;
+;--------------------------------------------;
 [colors]
 background = ${xrdb:background}
 foreground = ${xrdb:foreground}
@@ -11,6 +15,10 @@ pessego = ${xrdb:pessego}
 cinza = ${xrdb:cinza}
 
 
+
+;--------------------------------------------;
+;-------------- BARRA SUPERIOR --------------;
+;--------------------------------------------;
 [bar/top]
 monitor = ${env:MONITOR:eDP1}
 width = 100%
@@ -44,7 +52,9 @@ modules-right = xbacklight volume wifi ethernet battery date power_menu
 ;tray-padding = 2
 
 
-
+;--------------------------------------------;
+;-------------- BARRA INFERIOR --------------;
+;--------------------------------------------;
 [bar/bot]
 monitor = ${env:MONITOR:eDP1}
 width = 100%
@@ -75,12 +85,17 @@ modules-center = music
 tray-position = right
 tray-padding = 2
 
-# Module for window title
+
+
+;--------------------------------------------;
+;------------------- MODULOS ----------------;
+;--------------------------------------------;
+# Modulo do titulo da janela
 [module/xwindow]
 type = internal/xwindow
 label = %title:0:40:...%
 
-# Module for hostname
+# Modulo: Nome da maquina
 [module/hostname]
 type = custom/script
 interval = 256
@@ -90,7 +105,7 @@ format-prefix-foreground = ${colors.rosa}
 exec = echo "$(uname -n)"
 
 
-# Module for i3 workspaces
+# Modulo: Workspace i3-gaps
 [module/i3]
 type = internal/i3
 index-sort = true
@@ -134,7 +149,7 @@ label-visible-padding = 1
 label-visible-underline = ${colors.pink}
 
 
-# Module to show disk space
+# Modulo: Espaço em disco.
 [module/disk]
 type = custom/script
 interval = 5
@@ -143,9 +158,7 @@ format-prefix-foreground = ${colors.pink}
 exec = /usr/lib/i3blocks/disk
 
 
-;----------------------------------------------------------
-;		        C P U
-;----------------------------------------------------------
+# Modulo: Cpu
 ;[module/cpu]
 ;type = custom/script
 ;interval = 1
@@ -155,9 +168,7 @@ exec = /usr/lib/i3blocks/disk
 ;format-prefix-foreground = ${colors.destaque}
 ;exec = ~/.config/polybar/scripts/cpu.sh
 
-;----------------------------------------------------------
-;		    F I L E S Y S T E M -  /
-;----------------------------------------------------------
+# Modulo: Espaço na partição /
 [module/rootfs]
 interval = 400
 type = custom/script
@@ -166,9 +177,7 @@ format =  <label>
 format-prefix = " "
 format-prefix-foreground = ${colors.azul_turquesa}
 
-;----------------------------------------------------------
-;		    F I L E S Y S T E M - H O M E
-;----------------------------------------------------------
+# Modulo: Espaço na partição /home
 [module/homefs]
 interval = 400
 type = custom/script
@@ -177,10 +186,7 @@ format =  <label>
 format-prefix = " "
 format-prefix-foreground = ${colors.pink}
 
-
-
-
-# Module for brightness
+# Modulo: Brilho da tela.
 [module/xbacklight]
 type = internal/xbacklight
 format = <label> <bar>
@@ -198,7 +204,7 @@ bar-empty-font = 2
 bar-empty-foreground = ${colors.cinza}
 
 
-# Module for RAM Memory
+# Modulo: Memória RAM
 [module/memory]
 type = internal/memory
 interval = 2
@@ -207,7 +213,7 @@ format-prefix-foreground = ${colors.azul_turquesa}
 label = %gb_used%
 
 
-# Module for wifi
+# Modulo: Wi-fi
 [module/wifi]
 type = internal/network
 interface = wlp2s0
@@ -225,8 +231,7 @@ ramp-signal-3 = 
 ramp-signal-4 = 
 ramp-signal-foreground = ${colors.pink}
 
-
-# Module for ethernet
+# Modulo: Rede
 [module/ethernet]
 type = internal/network
 interface = enp1s0
@@ -238,8 +243,7 @@ format-disconnected =
 #label-disconnected = %ifname% disconnected
 #label-disconnected-foreground = ${colors.pink}
 
-
-# Module for date & time
+# Modulo: Data e hora.
 [module/date]
 type = internal/date
 interval = 1
@@ -248,8 +252,7 @@ format-prefix-foreground = ${colors.azul_turquesa}
 date = %d %b, %H:%M:%S
 label = %date%
 
-
-# Module for volume 
+# Modulo: Volume
 [module/volume]
 type = internal/volume
 format-volume = <label-volume>
@@ -260,8 +263,7 @@ format-muted-prefix = "  "
 format-muted-prefix-foreground = ${colors.azul_turquesa}
 label-muted = "Mute"
 
-
-# Module for battery
+# Modulo: Bateria
 [module/battery]
 type = internal/battery
 battery = BAT1
@@ -296,7 +298,7 @@ animation-charging-foreground-4 = ${colors.verde}
 animation-charging-framerate = 350
 
 
-# Module for power menu
+# Modulo: Menu sair
 [module/power_menu]
 type = custom/menu
 format-foreground = ${colors.pink}
@@ -322,7 +324,7 @@ content-foreground = ${colors.azul_turquesa}
 click-left = imgur-screenshot -k false
 
 
-# Module for music
+# Modulo: Spotify
 [module/music]
 type = custom/script
 format-prefix = " "
