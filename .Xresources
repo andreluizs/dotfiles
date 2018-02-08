@@ -13,23 +13,16 @@ Xft.rgba: rgb
 
 
 ! Rofi
-rofi.modi: window,run,ssh
-
+rofi.modi: window,run,drun
 rofi.color-enabled: true
-
-! Terminal
 rofi.terminal: termite
+rofi.show-icons: true
+rofi.lines: 5
 
 ! Window	    backgroud  border   separator
 rofi.color-window: #263238,   #263238, #263238
-
-! Normal
 rofi.color-normal: #263238, #d8dee8, #263238, #263238, #00bcd4
-
-! Ativo
 rofi.color-active: #263238, #b48ead, #263238, #263238, #93e5cc
-
-! Urgente
 rofi.color-urgent: #263238, #ebcb8b, #263238, #263238, #ebcb8b
 
 ! Hide scroll
