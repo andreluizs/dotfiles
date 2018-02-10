@@ -40,12 +40,12 @@ module-margin-left = 1
 module-margin-right = 1
 
 ;font-N = <fontconfig pattern>;<vertical offset>
-font-0 = xos4 Terminus:size=13;1
-font-1 = FontAwesome:size=13;2
+font-0 = xos4Terminus:size=13;3
+font-1 = FontAwesome:size=13;4
 
 modules-left = i3
 modules-center = xwindow
-modules-right = xbacklight volume wifi ethernet battery date power_menu
+modules-right = battery date hora power_menu
 
 # tray-padding = 0
 ;tray-position = right
@@ -69,17 +69,17 @@ border-left-size = 0 # margin left
 border-top-size = 0
 
 padding-left = 2
-padding-right = 0
+padding-right = 2
 
 module-margin-left = 1
 module-margin-right = 1
 
-font-0 = xos4 Terminus:size=13;1
-font-1 = FontAwesome:size=13;2
+font-0 = xos4 Terminus:size=13;3
+font-1 = FontAwesome:size=13;4
 
-modules-left = hostname homefs rootfs memory filesystem
-modules-center = music
-#modules-right = disk
+modules-left = spotify
+modules-center = wifi
+modules-right = volume xbacklight
 
 # tray-padding = 0
 tray-position = right
@@ -190,10 +190,10 @@ format-prefix-foreground = ${colors.pink}
 [module/xbacklight]
 type = internal/xbacklight
 format = <label> <bar>
-label = " "
+label = " "
 label-foreground = ${colors.pessego}
-bar-width = 10
-bar-indicator = |
+bar-width = 8
+bar-indicator = 
 bar-indicator-foreground = ${colors.pessego}
 bar-indicator-font = 2
 bar-fill = ─
@@ -218,8 +218,9 @@ label = %gb_used%
 type = internal/network
 interface = wlp2s0
 interval = 3.0
-format-connected = <ramp-signal> <label-connected>
-label-connected = "%signal%% %{F#F1F1F1} %{F-}%downspeed% %{F#F1F1F1} %{F-}%upspeed%"
+#format-connected = <ramp-signal> <label-connected>
+format-connected= <label-connected>
+label-connected = " %{F-}%downspeed% %{F#F1F1F1} %{F-}%upspeed%"
 
 format-disconnected = <label-disconnected>
 label-disconnected = " ..."
@@ -243,23 +244,33 @@ format-disconnected =
 #label-disconnected = %ifname% disconnected
 #label-disconnected-foreground = ${colors.pink}
 
-# Modulo: Data e hora.
+# Modulo: Data.
 [module/date]
 type = internal/date
-interval = 1
-format-prefix = "  " 
+interval = 500
+format-prefix = " " 
 format-prefix-foreground = ${colors.azul_turquesa}
-date = %d %b, %H:%M:%S
+date = "%d/%m/%Y"
 label = %date%
+
+# Modulo: Hora.
+[module/hora]
+type = internal/date
+interval = 1
+format-prefix = "" 
+format-prefix-foreground = ${colors.ardosia_escuro}
+hora = "%H:%M:%s"
+label = %hora%
 
 # Modulo: Volume
 [module/volume]
 type = internal/volume
+bar-indicator = 
 format-volume = <label-volume>
-format-volume-prefix = "  "
+format-volume-prefix = " "
 format-volume-prefix-foreground = ${colors.azul_turquesa}
-label-volume = %percentage% %
-format-muted-prefix = "  "
+label-volume = %percentage%%
+format-muted-prefix = " "
 format-muted-prefix-foreground = ${colors.azul_turquesa}
 label-muted = "Mute"
 
@@ -325,7 +336,7 @@ click-left = imgur-screenshot -k false
 
 
 # Modulo: Spotify
-[module/music]
+[module/spotify]
 type = custom/script
 format-prefix = " "
 format-prefix-foreground = ${colors.verde}
@@ -336,5 +347,5 @@ exec = $HOME/.config/polybar/scripts/music
 screenchange-reload = true
 
 [global/wm]
-margin-top = 5
-margin-bottom = 5
+margin-top = 0
+margin-bottom = 0
