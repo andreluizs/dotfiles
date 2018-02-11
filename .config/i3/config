@@ -85,7 +85,8 @@ bindsym $mod+a focus parent
 ######################## C O R E S ##########################
 #############################################################
 set_from_resource $fg i3wm.foreground #D8DEE9
-set_from_resource $bg i3wm.background #2E3440
+# set_from_resource $bg i3wm.background #2E3440
+set_from_resource $bg i3wm.background #66000000
 
 # class                 border  backgr. text indicator child_border
 client.focused          $bg     $bg     $fg  $bg       $bg
@@ -220,10 +221,10 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-bar {
-    i3bar_command $HOME/.config/polybar/launch.sh
+#bar {
+    #i3bar_command $HOME/.config/polybar/launch.sh
     #status_command i3blocks -c $HOME/.config/i3blocks/meui3blocks.conf
-}
+#}
 
 # Remove blue window bar i3 uses
 for_window [class="^.*"] border pixel 0
@@ -231,8 +232,9 @@ for_window [class="^.*"] border pixel 0
 #############################################################
 ##################### I N I C I A R #########################
 #############################################################
-exec_always --no-startup-id feh --bg-fill $HOME/Imagens/developer1.jpg 
-#exec --no-startup-id ~/.config/polybar/launch.sh
+exec_always --no-startup-id feh --bg-fill $HOME/Imagens/landscape1.jpg 
+exec nitrogen --restore
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id thunar --daemon
 exec --no-startup-id compton --config ~/.config/compton.conf -b
 exec --no-startup-id nm-applet
