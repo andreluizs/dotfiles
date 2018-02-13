@@ -1,6 +1,6 @@
 # Espaço entre as janelas
-gaps inner 20
-gaps outer 25
+gaps inner 15
+gaps outer 15
 
 # Definição da tecla super
 set $mod Mod4
@@ -231,10 +231,11 @@ for_window [class="^.*"] border pixel 4
 #############################################################
 ##################### I N I C I A R #########################
 #############################################################
-exec nitrogen --restore
+exec_always nitrogen --restore
 exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id thunar --daemon
 exec --no-startup-id compton --config ~/.config/compton.conf -b
+exec --no-startup-id dunst
 exec --no-startup-id nm-applet
 exec --no-startup-id numlockx on
 exec --no-startup-id synclient VertEdgeScroll=1 HorizEdgeScroll=1 TapButton1=1 TapButton2=3 TapButton3=2

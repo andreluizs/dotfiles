@@ -7,7 +7,7 @@ foreground =  #c4b7c5
 transparente = #5a000000
 preto = #1b1d1e
 pink = #d90e79
-verde = #98de00
+verde =#98de00 
 rosa = #fd5d77
 azul_turquesa = #03cbca
 ardosia_escuro = #473b6b
@@ -218,29 +218,17 @@ format-discharging = <ramp-capacity> <label-discharging>
 format-full-prefix = " "
 format-full-prefix-foreground = ${colors.verde}
 
-ramp-capacity-0 = ""
-ramp-capacity-1 = ""
-ramp-capacity-2 = ""
-ramp-capacity-3 = ""
-ramp-capacity-4 = ""
+ramp-capacity-0 = "%{F#FF0000}%{F-} "
+ramp-capacity-1 = "%{F#FF0000}%{F-} "
+ramp-capacity-2 = "%{F#e4b226}%{F-} "
+ramp-capacity-3 = "%{F#98de00}%{F-} "
+ramp-capacity-4 = "%{F#98de00}%{F-} "
 
-ramp-capacity-foreground-0 = ${colors.pink}
-ramp-capacity-foreground-1 = ${colors.pessego}
-ramp-capacity-foreground-2 = ${colors.verde}
-ramp-capacity-foreground-3 = ${colors.verde}
-ramp-capacity-foreground-4 = ${colors.verde}
-
-animation-charging-0 = ""
-animation-charging-1 = ""
-animation-charging-2 = ""
-animation-charging-3 = ""
-animation-charging-4 = ""
-
-animation-charging-foreground-0 = ${colors.pink}
-animation-charging-foreground-1 = ${colors.pessego}
-animation-charging-foreground-2 = ${colors.verde}
-animation-charging-foreground-3 = ${colors.verde}
-animation-charging-foreground-4 = ${colors.verde}
+animation-charging-0 = "%{F#FF0000}%{F-} "
+animation-charging-1 = "%{F#FF0000}%{F-} "
+animation-charging-2 = "%{F#e4b226}%{F-} "
+animation-charging-3 = "%{F#98de00}%{F-} "
+animation-charging-4 = "%{F#98de00}%{F-} "
 animation-charging-framerate = 350
 
 # Modulo: Menu sair
