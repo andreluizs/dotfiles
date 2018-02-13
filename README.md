@@ -9,6 +9,7 @@
 - Lançador de Apps: [Rofi](https://github.com/DaveDavenport/rofi)
 - Gerenciador de Notificação: [Dunst](https://github.com/dunst-project/dunst)
 - Editor de Texto: [Vim](https://github.com/vim/vim)
+- Compositor: [Compton](https://github.com/chjj/compton)
 - Wallpaper: [Sunset](https://resi.ze-robot.com/img/sunset-6.html)
 
 ##### Desktop: 
