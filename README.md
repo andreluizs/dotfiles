@@ -10,3 +10,6 @@
 - Gerenciador de Notificação: [Dunst](https://github.com/dunst-project/dunst)
 - Editor de Texto: [Vim](https://github.com/vim/vim)
 - Wallpaper: [Sunset](https://resi.ze-robot.com/img/sunset-6.html)
+
+##### Desktop: 
+![Desktop](https://github.com/andreluizs/dotfiles/blob/master/.desktop.png?raw=true)
