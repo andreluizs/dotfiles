@@ -2,8 +2,8 @@
 ;------------------- CORES ------------------;
 ;--------------------------------------------;
 [colors]
-background = #2E3440
-foreground = #eee
+background = #00122d
+foreground =  #c4b7c5
 transparente = #5a000000
 preto = #1b1d1e
 pink = #d90e79
@@ -14,6 +14,7 @@ ardosia_escuro = #473b6b
 pessego = #fecf87
 cinza = #ccccc6
 vermelho = #FF0000
+amarelo = #e4b226
 
 ;--------------------------------------------;
 ;--------------- CONFIGURAÇÕES --------------;
@@ -34,22 +35,16 @@ margin-bottom = 0
 [bar/top]
 monitor = ${env:MONITOR:eDP1}
 width = 100%
-height = 30
-wm-restack = i3
-background = ${colors.transparente}
+height = 35
+background = ${colors.background}
 foreground = ${colors.foreground}
-line-size = 2
-border-left-size = 0
-border-top-size = 0
-padding-left = 0
-padding-right = 2
-module-margin-left = 1
-module-margin-right = 1
-font-0 = xos4Terminus:size=13;3
-font-1 = FontAwesome:size=13;4
+
+font-0 = Coda:size=11;4
+font-1 = FontAwesome:size=14;4
+
 modules-left = i3
 modules-center = xwindow
-modules-right = bateria data hora power_menu
+modules-right = volume brilho bateria hora power_menu
 
 ;--------------------------------------------;
 ;-------------- BARRA INFERIOR --------------;
@@ -57,26 +52,24 @@ modules-right = bateria data hora power_menu
 [bar/bot]
 monitor = ${env:MONITOR:eDP1}
 width = 100%
-height = 30
+height = 35
 wm-restack = i3
 bottom = true
-background = ${colors.transparente}
+background = ${colors.background}
 foreground = ${colors.foreground}
-border-left-size = 0
-border-top-size = 0
-padding-left = 2
-padding-right = 2
-module-margin-left = 1
-module-margin-right = 1
-font-0 = xos4 Terminus:size=13;3
-font-1 = FontAwesome:size=13;4
+
+font-0 = Coda:size=11;4
+font-1 = FontAwesome:size=14;4
+
 modules-left = spotify
-modules-center = wifi
-modules-right = volume xbacklight
+modules-center = cpu memoria temperatura wifi
+modules-right = 
+
 tray-position = right
-tray-padding = 2
-tray-background = #5a000000
-tray-transparent = true
+tray-padding = 3
+tray-background = ${colors.background}
+tray-scale = 1.0
+tray-maxsize = 22
 
 ;--------------------------------------------;
 ;------------------ MODULOS -----------------;
@@ -90,6 +83,9 @@ label = %title:0:40:...%
 [module/i3]
 type = internal/i3
 index-sort = true
+format-padding = 3
+strip-wsnumbers = true
+
 ws-icon-1 = "1;"
 ws-icon-2 = "2;"
 ws-icon-3 = "3;"
@@ -101,56 +97,71 @@ ws-icon-8 = "8;"
 ws-icon-9 = "9;"
 ws-icon-0 = "10;"
 ws-icon-default = ""
-strip-wsnumbers = true
-label-indicator-padding = 2
-label-indicator-background = ${colors.background}
-label-indicator-underline = ${colors.pink}
+
 label-focused = "%icon%"
-label-focused-background = ${colors.transparente}
-label-focused-underline = ${colors.pink}
+label-focused-foreground = ${colors.azul_turquesa}
 label-focused-padding = 2
+
 label-unfocused = "%icon%"
 label-unfocused-padding = 2
+
 label-urgent = "%icon%"
-label-urgent-background = ${colors.pink}
+label-urgent-foreground = ${colors.amarelo}
 label-urgent-padding = 2
-label-visible = 
-label-visible-foreground = ${colors.foreground}
-label-visible-background = ${colors.background}
-label-visible-padding = 1
-label-visible-underline = ${colors.pink}
+
+# Modulo: CPU.
+[module/cpu]
+type = internal/cpu
+interval = 1
+format = <label>
+format-padding = 2
+label = "%{F#fecf87}%{F-} %percentage%%"
+
+# Modulo: Memória.
+[module/memoria]
+type = internal/memory
+interval = 1
+format = <label>
+format-padding = 2
+label = "%{F#435adb}%{F-} %gb_used%"
+
+# Modulo: Temperatura.
+[module/temperatura]
+type = internal/temperature
+interval = 1
+thermal-zone = 0
+warn-temperature = 80
+format = <ramp> <label>
+format-padding = 3
+format-warn = <ramp> <label-warn>
+format-warn-padding = 3
+label = %temperature%
+label-warn = %temperature%
+label-warn-foreground = ${colors.amarelo}
+
+ramp-0 = " "
+ramp-1 = " "
+ramp-2 = " "
+ramp-3 = " "
+ramp-4 = " "
 
 # Modulo: Brilho da tela.
-[module/xbacklight]
+[module/brilho]
 type = internal/xbacklight
-format = <label> <bar>
-label = " "
+format = <label>
+format-padding = 3
+label =  %percentage%%
 label-foreground = ${colors.pessego}
-bar-width = 5
-bar-indicator = ""
-bar-indicator-foreground = ${colors.pessego}
-bar-fill = ""
-bar-fill-foreground = ${colors.pessego}
-bar-empty = ""
-bar-empty-foreground = ${colors.cinza}
 
 # Modulo: Volume
 [module/volume]
 type = internal/volume
-format-volume = <label-volume> <bar-volume>
-label-volume = " "
+format-volume = <label-volume>
+format-padding = 3
+label-volume =  %percentage%%
 label-volume-foreground = ${colors.azul_turquesa}
-bar-volume-width = 5
-bar-volume-indicator = ""
-bar-volume-indicator-foreground = ${colors.azul_turquesa}
-bar-volume-fill = ""
-bar-volume-fill-foreground = ${colors.azul_turquesa}
-bar-volume-empty = ""
-bar-volume-empty-foreground = ${colors.cinza}
 format-muted-prefix = " "
-format-muted-prefix-foreground = ${colors.azul_turquesa}
 label-muted = "Mute"
-label-muted-foreground = ${colors.azul_turquesa}
 
 # Modulo: Wi-fi
 [module/wifi]
@@ -158,7 +169,8 @@ type = internal/network
 interface = wlp2s0
 interval = 3.0
 format-connected= <label-connected>
-label-connected = " %{F-}%downspeed% %{F#F1F1F1} %{F-}%upspeed%"
+format-padding = 3
+label-connected = "%{F#98de00} %{F-}%downspeed%  %{F#e4b226}%{F-} %upspeed%"
 format-disconnected = <label-disconnected>
 label-disconnected = " ..."
 label-disconnected-foreground = ${colors.pink}
@@ -174,29 +186,20 @@ ramp-signal-foreground = ${colors.pink}
 type = internal/network
 interface = enp1s0
 interval = 3.0
+format-padding = 3
 format-connected-prefix = " "
 format-connected-prefix-foreground = ${colors.pink}
 label-connected = " %local_ip%"
 format-disconnected = 
 
-# Modulo: Data.
-[module/data]
-type = internal/date
-interval = 500
-format-prefix = " " 
-format-prefix-foreground = ${colors.azul_turquesa}
-date = "%d/%m/%Y"
-label = %date%
-
 # Modulo: Hora.
 [module/hora]
 type = internal/date
 interval = 1
-format-prefix = " " 
-format-prefix-foreground = ${colors.rosa}
+format-padding = 3
 time = "%H:%M:%S"
-label = %time%
-
+time-alt = "%d/%m/%Y"
+label = " %time%"
 
 # Modulo: Bateria
 [module/bateria]
@@ -204,27 +207,35 @@ type = internal/battery
 battery = BAT1
 adapter = ADP1
 full-at = 99
+format-padding = 3
+
 format-charging = <animation-charging> <label-charging>
 format-charging-foreground = ${colors.verde}
 format-charging-prefix = " "
+
 format-discharging = <ramp-capacity> <label-discharging>
+
 format-full-prefix = " "
 format-full-prefix-foreground = ${colors.verde}
+
 ramp-capacity-0 = ""
 ramp-capacity-1 = ""
 ramp-capacity-2 = ""
 ramp-capacity-3 = ""
 ramp-capacity-4 = ""
+
 ramp-capacity-foreground-0 = ${colors.pink}
 ramp-capacity-foreground-1 = ${colors.pessego}
 ramp-capacity-foreground-2 = ${colors.verde}
 ramp-capacity-foreground-3 = ${colors.verde}
 ramp-capacity-foreground-4 = ${colors.verde}
+
 animation-charging-0 = ""
 animation-charging-1 = ""
 animation-charging-2 = ""
 animation-charging-3 = ""
 animation-charging-4 = ""
+
 animation-charging-foreground-0 = ${colors.pink}
 animation-charging-foreground-1 = ${colors.pessego}
 animation-charging-foreground-2 = ${colors.verde}
@@ -237,7 +248,7 @@ animation-charging-framerate = 350
 type = custom/menu
 format-foreground = ${colors.pink}
 format = <label-toggle> <menu>
-format-padding = 0
+format-padding = 2
 format-margin = 0
 menu-0-0 = "  Desligar | "
 menu-0-0-exec = shutdown now
@@ -253,6 +264,7 @@ label-close =
 [module/spotify]
 type = custom/script
 format-prefix = " "
+format-padding = 3
 format-prefix-foreground = ${colors.verde}
 interval = 1
 exec = $HOME/.config/polybar/scripts/music
