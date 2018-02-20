@@ -4,10 +4,11 @@ rofi.modi: window,run,drun
 rofi.color-enabled: true
 rofi.terminal: termite
 rofi.show-icons: false
-rofi.lines: 5
-rofi.columns: 2
+rofi.lines: 10
+rofi.columns: 1
 rofi.width: 800
 rofi.bw: 4
+rofi.font: Iosevka Medium 14
 
 ! Window	    backgroud  border   separator
 rofi.color-window: #00122d, #101e6d, #00122d

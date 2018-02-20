@@ -1,7 +1,7 @@
 [options]
 browser = google-chrome-stable
 clickable_url = true
-font = Inconsolata 18px
+font = Iosevka Term 18px
 
 [colors]
 # http://terminal.sexy/#Jh858fHxGx0e2Q55mN4A_V13A8vKRztr_s-HzMzGUFNU_iB7tuNU_qGCLfzebnGc_vGE-Pjy

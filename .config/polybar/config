@@ -39,7 +39,7 @@ height = 35
 background = ${colors.background}
 foreground = ${colors.foreground}
 
-font-0 = Coda:size=11;4
+font-0 = Iosevka:Bold:size=12;4
 font-1 = FontAwesome:size=14;4
 
 modules-left = i3
@@ -58,7 +58,7 @@ bottom = true
 background = ${colors.background}
 foreground = ${colors.foreground}
 
-font-0 = Coda:size=11;4
+font-0 = Iosevka:Bold:size=12;4
 font-1 = FontAwesome:size=14;4
 
 modules-left = spotify
@@ -66,7 +66,7 @@ modules-center = cpu memoria temperatura wifi
 modules-right = 
 
 tray-position = right
-tray-padding = 3
+tray-padding = 2
 tray-background = ${colors.background}
 tray-scale = 1.0
 tray-maxsize = 22
@@ -83,7 +83,7 @@ label = %title:0:40:...%
 [module/i3]
 type = internal/i3
 index-sort = true
-format-padding = 3
+# format-padding = 2
 strip-wsnumbers = true
 
 ws-icon-1 = "1;"
@@ -132,24 +132,24 @@ interval = 1
 thermal-zone = 0
 warn-temperature = 80
 format = <ramp> <label>
-format-padding = 3
+format-padding = 2
 format-warn = <ramp> <label-warn>
-format-warn-padding = 3
+format-warn-padding = 2
 label = %temperature%
 label-warn = %temperature%
 label-warn-foreground = ${colors.amarelo}
 
-ramp-0 = " "
-ramp-1 = " "
-ramp-2 = " "
-ramp-3 = " "
-ramp-4 = " "
+ramp-0 = ""
+ramp-1 = ""
+ramp-2 = ""
+ramp-3 = ""
+ramp-4 = ""
 
 # Modulo: Brilho da tela.
 [module/brilho]
 type = internal/xbacklight
 format = <label>
-format-padding = 3
+format-padding = 2
 label =  %percentage%%
 label-foreground = ${colors.pessego}
 
@@ -157,7 +157,7 @@ label-foreground = ${colors.pessego}
 [module/volume]
 type = internal/volume
 format-volume = <label-volume>
-format-padding = 3
+format-padding = 2
 label-volume =  %percentage%%
 label-volume-foreground = ${colors.azul_turquesa}
 format-muted-prefix = " "
@@ -169,7 +169,7 @@ type = internal/network
 interface = wlp2s0
 interval = 3.0
 format-connected= <label-connected>
-format-padding = 3
+format-padding = 2
 label-connected = "%{F#98de00} %{F-}%downspeed%  %{F#e4b226}%{F-} %upspeed%"
 format-disconnected = <label-disconnected>
 label-disconnected = " ..."
@@ -186,7 +186,7 @@ ramp-signal-foreground = ${colors.pink}
 type = internal/network
 interface = enp1s0
 interval = 3.0
-format-padding = 3
+format-padding = 2
 format-connected-prefix = " "
 format-connected-prefix-foreground = ${colors.pink}
 label-connected = " %local_ip%"
@@ -196,7 +196,7 @@ format-disconnected =
 [module/hora]
 type = internal/date
 interval = 1
-format-padding = 3
+format-padding = 2
 time = "%H:%M:%S"
 time-alt = "%d/%m/%Y"
 label = " %time%"
@@ -207,7 +207,7 @@ type = internal/battery
 battery = BAT1
 adapter = ADP1
 full-at = 99
-format-padding = 3
+format-padding = 2
 
 format-charging = <animation-charging> <label-charging>
 format-charging-foreground = ${colors.verde}
@@ -218,17 +218,17 @@ format-discharging = <ramp-capacity> <label-discharging>
 format-full-prefix = " "
 format-full-prefix-foreground = ${colors.verde}
 
-ramp-capacity-0 = "%{F#FF0000}%{F-} "
-ramp-capacity-1 = "%{F#FF0000}%{F-} "
-ramp-capacity-2 = "%{F#e4b226}%{F-} "
-ramp-capacity-3 = "%{F#98de00}%{F-} "
-ramp-capacity-4 = "%{F#98de00}%{F-} "
+ramp-capacity-0 = "%{F#FF0000}%{F-}"
+ramp-capacity-1 = "%{F#FF0000}%{F-}"
+ramp-capacity-2 = "%{F#e4b226}%{F-}"
+ramp-capacity-3 = "%{F#98de00}%{F-}"
+ramp-capacity-4 = "%{F#98de00}%{F-}"
 
-animation-charging-0 = "%{F#FF0000}%{F-} "
-animation-charging-1 = "%{F#FF0000}%{F-} "
-animation-charging-2 = "%{F#e4b226}%{F-} "
-animation-charging-3 = "%{F#98de00}%{F-} "
-animation-charging-4 = "%{F#98de00}%{F-} "
+animation-charging-0 = "%{F#FF0000}%{F-}"
+animation-charging-1 = "%{F#FF0000}%{F-}"
+animation-charging-2 = "%{F#e4b226}%{F-}"
+animation-charging-3 = "%{F#98de00}%{F-}"
+animation-charging-4 = "%{F#98de00}%{F-}"
 animation-charging-framerate = 350
 
 # Modulo: Menu sair
@@ -252,7 +252,7 @@ label-close =
 [module/spotify]
 type = custom/script
 format-prefix = " "
-format-padding = 3
+format-padding = 2
 format-prefix-foreground = ${colors.verde}
 interval = 1
 exec = $HOME/.config/polybar/scripts/music

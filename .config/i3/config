@@ -12,7 +12,7 @@ set $mod Mod4
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 10
-font pango:SF Pro Text Medium 10
+font pango:Iosevka Medium 10
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -87,8 +87,8 @@ bindsym $mod+a focus parent
 #############################################################
 # class                 border      backgr.     text        indicator   child_border
 client.focused          #101e6d     #101e6d     #ffffff     #2e9ef4     #101e6d
-client.focused_inactive #333333     #132a4c     #ffffff     #484e50     #132a4c
-client.unfocused        #5a000000   #5a000000   #888888     #5a000000   #5a000000
+client.focused_inactive #132a4c     #132a4c     #888888     #132a4c     #132a4c
+client.unfocused        #304960     #304960     #888888     #304960     #304960
 client.urgent           #e4b226     #e4b226     #ffffff     #e4b226     #e4b226
 client.placeholder      #5a000000   #0c0c0c     #ffffff     #000000     #0c0c0c
 client.background       #ffffff
@@ -225,20 +225,19 @@ bindsym $mod+r mode "resize"
 #}
 
 # Remove blue window bar i3 uses
-# for_window [class="^.*"] border pixel 0
 for_window [class="^.*"] border pixel 4
 
 #############################################################
 ##################### I N I C I A R #########################
 #############################################################
-exec_always nitrogen --restore
-exec_always --no-startup-id ~/.config/polybar/launch.sh
-exec --no-startup-id thunar --daemon
-exec --no-startup-id compton --config ~/.config/compton.conf -b
-exec --no-startup-id dunst
-exec --no-startup-id nm-applet
-exec --no-startup-id numlockx on
-exec --no-startup-id synclient VertEdgeScroll=1 HorizEdgeScroll=1 TapButton1=1 TapButton2=3 TapButton3=2
+exec_always "nitrogen --restore"
+exec_always --no-startup-id "~/.config/polybar/launch.sh"
+exec --no-startup-id "thunar --daemon"
+exec --no-startup-id "compton --config ~/.config/compton.conf -b"
+exec --no-startup-id "dunst"
+exec --no-startup-id "nm-applet"
+exec --no-startup-id "numlockx on"
+exec --no-startup-id "synclient VertEdgeScroll=1 HorizEdgeScroll=1 TapButton1=1 TapButton2=3 TapButton3=2"
 
 ################# F I M - I N I C I A R #####################
 
@@ -248,20 +247,20 @@ exec --no-startup-id synclient VertEdgeScroll=1 HorizEdgeScroll=1 TapButton1=1 T
 ##################### A T A L H O S #########################
 #############################################################
 
-# Chrome
-bindsym $mod+g exec google-chrome-stable
-
-# Telegram
-bindsym $mod+t exec telegram-desktop
-
-# Thunar
-bindsym $mod+Ctrl+e exec thunar
+# PrintScreen
+bindsym Print exec "maim -u -s ~/Imagens/Screenshots/screenshot_$(date +'%d_%m_%Y_%H_%M_%S').png"
+bindsym Ctrl+Print exec "maim -u -s -n -l -c 0.157,0.333,0.466,0.4 | xclip -selection clipboard -t image/png" 
 
 # Controle de volume.
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +5% # Aumenta
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume 0 -5% # Dimunui
-bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle # Mute
+bindsym XF86AudioRaiseVolume exec "pactl set-sink-volume 0 +5%"
+bindsym XF86AudioLowerVolume exec "pactl set-sink-volume 0 -5%"
+bindsym XF86AudioMute exec "pactl set-sink-mute 0 toggle"
 
 # Brilho da tela.
-bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # Aumenta
-bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # Diminui
+bindsym XF86MonBrightnessUp "exec xbacklight -inc 20"
+bindsym XF86MonBrightnessDown "exec xbacklight -dec 20"
+
+# Terminal corrent WS
+bindsym $mod+Shift+Return exec --no-startup-id "$TERMINAL; i3-msg \"move window to workspace 4\""
+
+
