@@ -21,9 +21,9 @@ LANGUAGE=pt_BR
 LOCALE=America/Sao_Paulo
 
 # Funções
-iniciar(){
-	clear
-    echo 
+iniciar() {
+    clear
+    echo
     echo " [X] --- Configurando o Teclado --- [X]"
     loadkeys $KEYBOARD_LAYOUT
 }
