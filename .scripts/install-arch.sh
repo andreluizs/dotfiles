@@ -1,4 +1,5 @@
 #!/bin/bash
+# André Luiz dos Santos
 set -e
 
 # Dados pessoais.
