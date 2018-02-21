@@ -10,7 +10,7 @@ HOST=arch-note
 
 # Dados do HD
 HD=/dev/sda
-BOOT_FS=vfat -F32
+BOOT_FS="vfat -F32"
 HOME_FS=ext4
 ROOT_FS=ext4
 
