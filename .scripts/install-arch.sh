@@ -25,13 +25,13 @@ NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.
 iniciar() {
     echo
     echo "[#]--- CONFIGURANDO O TECLADO ---[#]"
-	echo "[#]------------------------------[#]"
+    echo "[#]------------------------------[#]"
     loadkeys $KEYBOARD_LAYOUT
-	echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
+    echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
     echo
     echo "[#]--- CONFIGURANDO O MIRROR ----[#]"
     echo "[#]------------------------------[#]"
-    sed -i 'li'$MIRROR /etc/pacman.d/mirrorlist
+    sed -i '1s/^/$MIRROR\n/' /etc/pacman.d/mirrorlist
     echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
     echo 
     echo "[#]--- ATUALIZANDO O SISTEMA ----[#]"
