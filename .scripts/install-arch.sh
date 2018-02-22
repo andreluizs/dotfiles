@@ -36,7 +36,7 @@ iniciar() {
     echo 
     echo "[#]--- ATUALIZANDO O SISTEMA ----[#]"
     echo "[#]------------------------------[#]"
-    pacman -Syu &> /dev/null
+    pacman -Syu
     echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
     echo
 }
