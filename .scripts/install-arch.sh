@@ -34,7 +34,7 @@ iniciar() {
     echo
     echo '[#]------ CONFIGURANDO O MIRROR ------[#]'
     echo '[#]-----------------------------------[#]'
-    sed -i '1s/^/' echo $MIRROR'\n/' /etc/pacman.d/mirrorlist
+    sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
     echo '[#]- OPERAÇÃO REALIZADA COM SUCESSO! -[#]'
     
     echo 
