@@ -23,22 +23,31 @@ NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.
 
 # Funções
 iniciar() {
+    local ERR=0
+    
     echo
-    echo "[#]--- CONFIGURANDO O TECLADO ---[#]"
-    echo "[#]------------------------------[#]"
+    echo "[#]------ CONFIGURANDO O TECLADO -----[#]"
+    echo "[#]-----------------------------------[#]"
     loadkeys $KEYBOARD_LAYOUT
-    echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
+    echo "[#]- OPERAÇÃO REALIZADA COM SUCESSO! -[#]"
+    
     echo
-    echo "[#]--- CONFIGURANDO O MIRROR ----[#]"
-    echo "[#]------------------------------[#]"
+    echo "[#]------ CONFIGURANDO O MIRROR ------[#]"
+    echo "[#]-----------------------------------[#]"
     sed -i '1s/^/$MIRROR\n/' /etc/pacman.d/mirrorlist
-    echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
+    echo "[#]- OPERAÇÃO REALIZADA COM SUCESSO! -[#]"
+    
     echo 
     echo "[#]--- ATUALIZANDO O SISTEMA ----[#]"
-    echo "[#]------------------------------[#]"
-    pacman -Syu
-    echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
-    echo
+    echo "[#]-----------------------------------[#]"
+    pacman -Syu 1>/dev/null || ERR=1
+    echo "[#]- OPERAÇÃO REALIZADA COM SUCESSO! -[#]"
+    
+    if [[ $ERR -eq 1 ]]; then
+                echo
+                echo "[!]--------- ERRO NA OPERAÇÃO --------[!]"
+                exit 1
+        fi
 }
 
 # Chamada das Funções
