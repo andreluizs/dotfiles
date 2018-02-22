@@ -1,5 +1,4 @@
 #!/bin/bash
-# André Luiz dos Santos
 set -e
 
 # Dados pessoais.
@@ -15,17 +14,33 @@ BOOT_FS="vfat -F32"
 HOME_FS=ext4
 ROOT_FS=ext4
 
-# Configurações
+# Configurações da Região
 KEYBOARD_LAYOUT=br-abnt2
+MIRROR="http://linorg.usp.br/archlinux/$repo/os/$arch"
 LANGUAGE=pt_BR
 LOCALE=America/Sao_Paulo
+NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org``\nFallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 # Funções
 iniciar() {
-    clear
     echo
-    echo " [X] --- Configurando o Teclado --- [X]"
+    echo "[#]--- CONFIGURANDO O TECLADO ---[#]"
+	echo "[#]------------------------------[#]"
     loadkeys $KEYBOARD_LAYOUT
+	echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
+    echo
+    echo "[#]--- CONFIGURANDO O MIRROR ----[#]"
+    echo "[#]------------------------------[#]"
+    sed -i 'li'$MIRROR /etc/pacman.d/mirrorlist
+    echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
+    echo 
+    echo "[#]--- ATUALIZANDO O SISTEMA ----[#]"
+    echo "[#]------------------------------[#]"
+    pacman -Syu &> /dev/null
+    echo "[#]----- OPERAÇÃO REALIZADA -----[#]"
+    echo
 }
 
+# Chamada das Funções
+clear
 iniciar
