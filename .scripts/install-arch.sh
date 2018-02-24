@@ -10,9 +10,6 @@ HOST=arch-note
 
 # Dados do HD
 HD=/dev/sda
-BOOT_FS=fat
-HOME_FS=ext4
-ROOT_FS=ext4
 
 # Tamanho das partições em MB
 BOOT_SIZE=512
@@ -63,20 +60,20 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted -s $HD mkpart primary $BOOT_FS $BOOT_START $BOOT_END 1>/dev/null || ERR=1
-    parted -s $HD set 1 boot on 1>/dev/null || ERR=1
+    parted $HD mkpart primary fat32 $BOOT_START $BOOT_END 1>/dev/null || ERR=1
+    parted $HD set 1 boot on 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
-    parted -s $HD mkpart primary linux-swap $SWAP_START $SWAP_END 1>/dev/null || ERR=1
+    parted $HD mkpart primary linux-swap $SWAP_START $SWAP_END 1>/dev/null || ERR=1
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
-    parted -s $HD mkpart primary $ROOT_FS $ROOT_START $ROOT_END 1>/dev/null || ERR=1
+    parted $HD mkpart primary ext4 $ROOT_START $ROOT_END 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted -s -- $HD mkpart primary $HOME_FS $HOME_START 100% 1>/dev/null || ERR=1
+    parted $HD mkpart primary ext4 $HOME_START 100% 1>/dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
@@ -96,7 +93,7 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /BOOT'
-    mkfs.$BOOT_FS -F32 /dev/sda1 -n BOOT 1>/dev/null || ERR=1
+    mkfs.fat -F32 /dev/sda1 -n BOOT 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
@@ -105,11 +102,11 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
-    mkfs.$ROOT_FS /dev/sda3 -L ROOT 1>/dev/null || ERR=1
+    mkfs.ext4 /dev/sda3 -L ROOT 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
-    mkfs.$HOME_FS /dev/sda4 -L HOME 1>/dev/null || ERR=1
+    mkfs.ext4 /dev/sda4 -L HOME 1>/dev/null || ERR=1
    
    if [[ $ERR -eq 1 ]]; then
         echo
