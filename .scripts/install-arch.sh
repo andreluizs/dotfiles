@@ -60,20 +60,20 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 $BOOT_START $BOOT_END 1>/dev/null || ERR=1
+    parted $HD mkpart primary fat32 0% 512MB 1>/dev/null || ERR=1
     parted $HD set 1 boot on 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
-    parted $HD mkpart primary linux-swap $SWAP_START $SWAP_END 1>/dev/null || ERR=1
+    parted $HD mkpart primary linux-swap 512MB 4608MB 1>/dev/null || ERR=1
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
-    parted $HD mkpart primary ext4 $ROOT_START $ROOT_END 1>/dev/null || ERR=1
+    parted $HD mkpart primary ext4 4608MB 35328MB 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted $HD mkpart primary ext4 $HOME_START 100% 1>/dev/null || ERR=1
+    parted $HD mkpart primary ext4 35328MB 100% 1>/dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
@@ -93,20 +93,20 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /BOOT'
-    mkfs.fat -F32 /dev/sda1 -n BOOT 1>/dev/null || ERR=1
+    mkfs.fat -F32 $HD'1' -n BOOT 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
-    mkswap /dev/sda2 || ERR=1
-    swapon /dev/sda2 || ERR=1
+    mkswap $HD'2' || ERR=1
+    swapon $HD'2' || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
-    mkfs.ext4 /dev/sda3 -L ROOT 1>/dev/null || ERR=1
+    mkfs.ext4 $HD'3' -L ROOT 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
-    mkfs.ext4 /dev/sda4 -L HOME 1>/dev/null || ERR=1
+    mkfs.ext4 $HD'4' -L HOME 1>/dev/null || ERR=1
    
    if [[ $ERR -eq 1 ]]; then
         echo
