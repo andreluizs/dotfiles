@@ -50,7 +50,7 @@ iniciar() {
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
-    sed -i "1i $MIRROR" ~/.scripts/mirrorlist
+    sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
     
 }
 
