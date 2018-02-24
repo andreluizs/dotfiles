@@ -10,7 +10,7 @@ HOST=arch-note
 
 # Dados do HD
 HD=/dev/sda
-BOOT_FS='ESP fat32'
+BOOT_FS=fat
 HOME_FS=ext4
 ROOT_FS=ext4
 
@@ -96,7 +96,7 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /BOOT'
-    mkfs.$BOOT_FS /dev/sda1 -L BOOT 1>/dev/null || ERR=1
+    mkfs.$BOOT_FS -F32 /dev/sda1 -n BOOT 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
