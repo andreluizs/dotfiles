@@ -3,11 +3,11 @@ set -o errexit
 set -o pipefail
 
 # Dados pessoais.
-USER=andre
+USER="andre"
 USER_NAME="André Luiz"
-USER_PASSWD=andre
-ROOT_PASSWD=root
-HOST=arch-note
+USER_PASSWD="andre"
+ROOT_PASSWD="root"
+HOST="arch-note"
 
 # Dados do HD
 HD=/dev/sda
@@ -19,20 +19,20 @@ ROOT_SIZE=30745
 #HOME_SIZE=RESTO DO HD
 
 BOOT_START=0
-BOOT_END=($BOOT_SIZE + $BOOT_START)
+BOOT_END=$((BOOT_SIZE + BOOT_START))
 SWAP_START=$BOOT_END
-SWAP_END=($SWAP_START + $SWAP_SIZE)
+SWAP_END=$((SWAP_START + SWAP_SIZE))
 ROOT_START=$SWAP_END
-ROOT_END=($ROOT_START + $ROOT_SIZE)
+ROOT_END=$((ROOT_START + ROOT_SIZE))
 HOME_START=$ROOT_END
 HOME_END="100%"
 
 # Configurações da Região
 KEYBOARD_LAYOUT='br abnt2'
-MIRROR='Server = http://linorg.usp.br/archlinux/$repo/os/$arch'
-LANGUAGE=pt_BR
-LOCALE=America/Sao_Paulo
-NTP='NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org``\nFallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org'
+MIRROR="Server = http://linorg.usp.br/archlinux/\$repo/os/\$arch"
+LANGUAGE="pt_BR"
+LOCALE="America/Sao_Paulo"
+NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org``\\nFallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 # Funções
 iniciar() {
@@ -44,7 +44,7 @@ iniciar() {
 
     echo
     echo '[-#-] CONFIGURANDO O TECLADO'
-    localectl set-x11-keymap $KEYBOARD_LAYOUT
+    localectl set-x11-keymap "$KEYBOARD_LAYOUT"
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
@@ -61,7 +61,7 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 "$BOOT_START%" "$BOOT_END" 2> /dev/null || ERR=1
+    parted $HD mkpart primary fat32 "${BOOT_START}%" "$BOOT_END" 2> /dev/null || ERR=1
     parted $HD set 1 boot on 2> /dev/null || ERR=1
 
     echo
@@ -90,19 +90,19 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /BOOT'
-    mkfs.fat -F32 $HD'1' -n BOOT 1> /dev/null || ERR=1
+    mkfs.fat -F32 "${HD}1" -n BOOT 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
-    mkswap $HD'2' 1> /dev/null || ERR=1
+    mkswap "${HD}2" 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
-    mkfs.ext4 $HD'3' -L ROOT &> /dev/null || ERR=1
+    mkfs.ext4 "${HD}3" -L ROOT &> /dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
-    mkfs.ext4 $HD'4' -L HOME &> /dev/null || ERR=1
+    mkfs.ext4 "${HD}4" -L HOME &> /dev/null || ERR=1
    
    if [[ $ERR -eq 1 ]]; then
         echo
@@ -117,21 +117,21 @@ montar_particao(){
 
     echo
     echo '[-#-] HABILITANDO A PARTIÇÃO SWAP'
-    swapon $HD'2' 1> /dev/null || ERR=1
+    swapon "${HD}2" 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /ROOT'
-    mount $HD'3' /mnt 1> /dev/null || ERR=1
+    mount "${HD}3" /mnt 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
     mkdir -p /mnt/boot
-    mount $HD'1' /mnt/boot 1> /dev/null || ERR=1
+    mount "${HD}1" /mnt/boot 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
     mkdir /mnt/home
-    mount $HD'4' /mnt/home 1> /dev/null || ERR=1
+    mount "${HD}4" /mnt/home 1> /dev/null || ERR=1
 
     echo
     echo "---------------RESULTADO------------------"
