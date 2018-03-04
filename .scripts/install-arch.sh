@@ -192,7 +192,7 @@ configurar_sistema(){
         sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
         echo "${USER}:${USER_PASSWD}" | chpasswd
         echo "root:${ROOT_PASSWD}" | chpasswd
-        bootctl install
+        bootctl install "$HD"
         echo -e "$LOADER_CONF" > /boot/loader/loader.conf
         echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
     ) || ERR=1
