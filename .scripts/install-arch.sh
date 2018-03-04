@@ -52,6 +52,9 @@ iniciar() {
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
     sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
+    pacman -Sy &> /dev/null
+    pacman -S reflector --needed --noconfirm &> /dev/null
+    reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist &> /dev/null
     
 }
 
@@ -173,6 +176,7 @@ configurar_sistema(){
     echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
     (
         arch-chroot /mnt
+        echo "CHROOT"
         echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
         sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
         locale-gen
@@ -183,9 +187,10 @@ configurar_sistema(){
         echo -e "$NTP"
         sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
         pacman -Sy
+        pacman-key --init && pacman-key --populate archlinux
         echo "$HOST" > /etc/hostname
-        pacman -S networkmanager --needed --noconfirm
-        systemctl enable NetworkManager
+        #pacman -S networkmanager --needed --noconfirm
+        #systemctl enable NetworkManager
         useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
         echo "${USER}:${USER_PASSWD}" | chpasswd
         echo "root:${ROOT_PASSWD}" | chpasswd
@@ -193,6 +198,9 @@ configurar_sistema(){
         echo -e "$LOADER_CONF" > /boot/loader/loader.conf
         echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
     ) || ERR=1
+
+    echo 
+    echo '[-#-] FIM'
 
 
     if [[ $ERR -eq 1 ]]; then
