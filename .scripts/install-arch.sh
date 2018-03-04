@@ -1,9 +1,10 @@
 #!/bin/bash
-set -e
+set -o errexit
+set -o pipefail
 
 # Dados pessoais.
 USER=andre
-USER_NAME='André Luiz'
+USER_NAME="André Luiz"
 USER_PASSWD=andre
 ROOT_PASSWD=root
 HOST=arch-note
@@ -60,20 +61,20 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 0% 512MB 2>/dev/null || ERR=1
-    parted $HD set 1 boot on 2>/dev/null || ERR=1
+    parted $HD mkpart primary fat32 0% 512MB 2> /dev/null || ERR=1
+    parted $HD set 1 boot on 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
-    parted $HD mkpart primary linux-swap 512MB 4608MB 1>/dev/null || ERR=1
+    parted $HD mkpart primary linux-swap 512MB 4608MB 2> /dev/null || ERR=1
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
-    parted $HD mkpart primary ext4 4608MB 35328MB 1>/dev/null || ERR=1
+    parted $HD mkpart primary ext4 4608MB 35328MB 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted $HD mkpart primary ext4 35328MB 100% 1>/dev/null || ERR=1
+    parted $HD mkpart primary ext4 35328MB 100% 2> /dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
