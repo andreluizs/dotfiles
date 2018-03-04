@@ -52,9 +52,9 @@ iniciar() {
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
     sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
-    pacman -Sy &> /dev/null
-    pacman -S reflector --needed --noconfirm &> /dev/null
-    reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist &> /dev/null
+    pacman -Sy
+    pacman -S reflector --needed --noconfirm
+    reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist
     
 }
 
@@ -192,6 +192,7 @@ configurar_sistema(){
         #pacman -S networkmanager --needed --noconfirm
         #systemctl enable NetworkManager
         useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
+        sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
         echo "${USER}:${USER_PASSWD}" | chpasswd
         echo "root:${ROOT_PASSWD}" | chpasswd
         bootctl install
