@@ -60,8 +60,10 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 0% 512MB echo $?
-    parted $HD set 1 boot on echo $?
+    parted $HD mkpart primary fat32 0% 512MB
+    echo $?
+    parted $HD set 1 boot on
+    echo $?
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
