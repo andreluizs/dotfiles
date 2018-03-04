@@ -98,11 +98,11 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
-    mkfs.ext4 $HD'3' -L ROOT 2> /dev/null || ERR=1
+    mkfs.ext4 $HD'3' -L ROOT 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
-    mkfs.ext4 $HD'4' -L HOME 2> /dev/null || ERR=1
+    mkfs.ext4 $HD'4' -L HOME 1> /dev/null || ERR=1
    
    if [[ $ERR -eq 1 ]]; then
         echo
