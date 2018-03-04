@@ -13,13 +13,12 @@ HOST="arch-note"
 HD=/dev/sda
 
 # Tamanho das partições em MB
-# 26 MB x 10
-BOOT_SIZE=538
-SWAP_SIZE=4356
-ROOT_SIZE=33320
+BOOT_SIZE=512
+SWAP_SIZE=4096
+ROOT_SIZE=30720
 #HOME_SIZE=RESTO DO HD
 
-BOOT_START=0
+BOOT_START=1
 BOOT_END=$((BOOT_SIZE + BOOT_START))
 SWAP_START=$BOOT_END
 SWAP_END=$((SWAP_START + SWAP_SIZE))
@@ -62,20 +61,20 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 "${BOOT_START}%" "$BOOT_END" 2> /dev/null || ERR=1
+    parted $HD mkpart primary fat32 "${BOOT_START}MB" "${BOOT_END}MB" 2> /dev/null || ERR=1
     parted $HD set 1 boot on 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
-    parted $HD mkpart primary linux-swap "$SWAP_START" "$SWAP_END" 2> /dev/null || ERR=1
+    parted $HD mkpart primary linux-swap "${SWAP_START}MB" "${SWAP_END}MB" 2> /dev/null || ERR=1
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
-    parted $HD mkpart primary ext4 "$ROOT_START" "$ROOT_END" 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "${ROOT_START}MB" "${ROOT_END}MB" 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted $HD mkpart primary ext4 "$HOME_START" "$HOME_END" 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "${HOME_START}MB" "$HOME_END" 2> /dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
