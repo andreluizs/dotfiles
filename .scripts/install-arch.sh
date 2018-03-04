@@ -51,10 +51,10 @@ iniciar() {
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
-    sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
-    pacman -Sy
-    pacman -S reflector --needed --noconfirm
-    reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist
+    # sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
+    cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
+    rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
     
 }
 
@@ -96,7 +96,7 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /BOOT'
-    mkfs.fat -F32 "${HD}1" -n BOOT 1> /dev/null || ERR=1
+    mkfs.vfat -F32 "${HD}1" -n BOOT 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
