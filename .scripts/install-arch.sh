@@ -18,12 +18,12 @@ SWAP_SIZE=4121
 ROOT_SIZE=30745
 #HOME_SIZE=RESTO DO HD
 
-BOOT_START=1
-BOOT_END=$(($BOOT_SIZE + $BOOT_START))
+BOOT_START=0
+BOOT_END=$($BOOT_SIZE + $BOOT_START)
 SWAP_START=$BOOT_END
-SWAP_END=$(($SWAP_START + $SWAP_SIZE))
+SWAP_END=$($SWAP_START + $SWAP_SIZE)
 ROOT_START=$SWAP_END
-ROOT_END=$(($ROOT_START + $ROOT_SIZE))
+ROOT_END=$($ROOT_START + $ROOT_SIZE)
 HOME_START=$ROOT_END
 #HOME_END=RESTO DO HD
 
@@ -61,20 +61,20 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 0% 512MB 2> /dev/null || ERR=1
+    parted $HD mkpart primary fat32 "$BOOT_START%" "$BOOT_END" 2> /dev/null || ERR=1
     parted $HD set 1 boot on 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
-    parted $HD mkpart primary linux-swap 512MB 4608MB 2> /dev/null || ERR=1
+    parted $HD mkpart primary linux-swap "$SWAP_START" "$SWAP_END" 2> /dev/null || ERR=1
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
-    parted $HD mkpart primary ext4 4608MB 35328MB 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "$ROOT_START" "$ROOT_END" 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted $HD mkpart primary ext4 35328MB 100% 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "$HOME_START" 100% 2> /dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
@@ -134,7 +134,7 @@ montar_particao(){
     mount $HD'4' /mnt/home 1> /dev/null || ERR=1
 
     echo
-    echo "---------------RESULTADO--------------------"
+    echo "---------------RESULTADO------------------"
     lsblk "$HD"
 
     if [[ $ERR -eq 1 ]]; then
