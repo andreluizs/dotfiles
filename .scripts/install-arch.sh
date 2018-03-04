@@ -67,7 +67,7 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 "${BOOT_START}MiB" "${BOOT_END}MiB" 2> /dev/null || ERR=1
+    parted $HD mkpart ESP fat32 "${BOOT_START}MiB" "${BOOT_END}MiB" 2> /dev/null || ERR=1
     parted $HD set 1 boot on 2> /dev/null || ERR=1
 
     echo
@@ -176,7 +176,6 @@ configurar_sistema(){
     echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
     (
         arch-chroot /mnt
-        echo "CHROOT"
         echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
         sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
         locale-gen
