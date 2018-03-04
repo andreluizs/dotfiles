@@ -60,10 +60,8 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 0% 512MB
-    echo $?
-    parted $HD set 1 boot on
-    echo $?
+    parted $HD mkpart primary fat32 0% 512MB 2>/dev/null || ERR=1
+    parted $HD set 1 boot on 2>/dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
@@ -95,8 +93,8 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
-    mkswap $HD'2' || ERR=1
-    swapon $HD'2' || ERR=1
+    mkswap $HD'2' 1>/dev/null || ERR=1
+    swapon $HD'2' 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
