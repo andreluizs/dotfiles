@@ -13,9 +13,9 @@ HOST=arch-note
 HD=/dev/sda
 
 # Tamanho das partições em MB
-BOOT_SIZE=512
-SWAP_SIZE=4096
-ROOT_SIZE=30720
+BOOT_SIZE=537
+SWAP_SIZE=4121
+ROOT_SIZE=30745
 #HOME_SIZE=RESTO DO HD
 
 BOOT_START=1
@@ -98,11 +98,11 @@ formatar_particao(){
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
-    mkfs.ext4 $HD'3' -L ROOT 1> /dev/null || ERR=1
+    mkfs.ext4 $HD'3' -L ROOT &> /dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
-    mkfs.ext4 $HD'4' -L HOME 1> /dev/null || ERR=1
+    mkfs.ext4 $HD'4' -L HOME &> /dev/null || ERR=1
    
    if [[ $ERR -eq 1 ]]; then
         echo
