@@ -28,11 +28,14 @@ HOME_START=$ROOT_END
 HOME_END="100%"
 
 # Configurações da Região
-KEYBOARD_LAYOUT='br abnt2'
+KEYBOARD_LAYOUT="br abnt2"
 MIRROR="Server = http://linorg.usp.br/archlinux/\$repo/os/\$arch"
 LANGUAGE="pt_BR"
-LOCALE="America/Sao_Paulo"
+TIMEZONE="America/Sao_Paulo"
 NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org``\\nFallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
+
+LOADER_CONF="timeout 2\\ndefault arch"
+ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
 
 # Funções
 iniciar() {
@@ -44,7 +47,7 @@ iniciar() {
 
     echo
     echo '[-#-] CONFIGURANDO O TECLADO'
-    localectl set-x11-keymap "${KEYBOARD_LAYOUT}"
+    localectl set-x11-keymap "$KEYBOARD_LAYOUT"
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
@@ -150,12 +153,51 @@ instalar_sistema(){
 
     echo
     echo '[-#-] INSTALANDO O SISTEMA BASE'
-    pacstrap /mnt base base-devel --noconfirm 1> /dev/null || ERR=1
+    pacstrap /mnt base base-devel &> /dev/null || ERR=1
 
+    echo
+    echo '[-#-] GERANDO O FSTAB'
+    genfstab -p -L /mnt >> /mnt/etc/fstab
 
     if [[ $ERR -eq 1 ]]; then
         echo
         echo '[ ! ] ERRO AO INSTALAR O SISTEMA'
+        exit 1
+    fi
+}
+
+configurar_sistema(){
+    local ERR=0
+    
+    echo
+    echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
+    (
+        arch-chroot /mnt
+        echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
+        sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
+        locale-gen
+        echo LANG=pt_BR.UTF-8 > /etc/locale.conf
+        export LANG=pt_BR.UTF-8 
+        timedatectl set-timezone "$TIMEZONE"
+        hwclock -w -u
+        echo -e "$NTP"
+        sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
+        pacman -Sy
+        echo "$HOST" > /etc/hostname
+        pacman -S networkmanager --needed --noconfirm
+        systemctl enable NetworkManager
+        useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
+        echo "${USER}:${USER_PASSWD}" | chpasswd
+        echo "root:${ROOT_PASSWD}" | chpasswd
+        bootctl install
+        echo -e "$LOADER_CONF" > /boot/loader/loader.conf
+        echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
+    ) || ERR=1
+
+
+    if [[ $ERR -eq 1 ]]; then
+        echo
+        echo '[ ! ] ERRO AO CONFIGURAR O SISTEMA'
         exit 1
     fi
 }
@@ -167,3 +209,4 @@ particionar_hd
 formatar_particao
 montar_particao
 instalar_sistema
+configurar_sistema
