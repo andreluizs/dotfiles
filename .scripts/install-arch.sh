@@ -19,13 +19,13 @@ ROOT_SIZE=30745
 #HOME_SIZE=RESTO DO HD
 
 BOOT_START=0
-BOOT_END=$($BOOT_SIZE + $BOOT_START)
+BOOT_END=($BOOT_SIZE + $BOOT_START)
 SWAP_START=$BOOT_END
-SWAP_END=$($SWAP_START + $SWAP_SIZE)
+SWAP_END=($SWAP_START + $SWAP_SIZE)
 ROOT_START=$SWAP_END
-ROOT_END=$($ROOT_START + $ROOT_SIZE)
+ROOT_END=($ROOT_START + $ROOT_SIZE)
 HOME_START=$ROOT_END
-#HOME_END=RESTO DO HD
+HOME_END="100%"
 
 # Configurações da Região
 KEYBOARD_LAYOUT='br abnt2'
@@ -74,7 +74,7 @@ particionar_hd(){
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted $HD mkpart primary ext4 "$HOME_START" 100% 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "$HOME_START" "$HOME_END" 2> /dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
