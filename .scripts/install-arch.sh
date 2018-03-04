@@ -116,17 +116,25 @@ montar_particao(){
     local ERR=0
 
     echo
-    echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
-
-    echo
     echo '[-#-] HABILITANDO A PARTIÇÃO SWAP'
-    swapon $HD'2' 1>/dev/null || ERR=1
+    swapon $HD'2' 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /ROOT'
+    mount $HD'3' /mnt 1> /dev/null || ERR=1
+
+    echo
+    echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
+    mount $HD'1' /mnt/boot > /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
+    mkdir /mnt/home 1> /dev/null || ERR=1
+    mount $HD'4' /mnt/home 1> /dev/null || ERR=1
+
+    echo
+    echo "---------------RESULTADO--------------------"
+    lsblk "$HD"
 
     if [[ $ERR -eq 1 ]]; then
         echo
@@ -136,9 +144,25 @@ montar_particao(){
 
 }
 
+instalar_sistema(){
+    local ERR=0
+
+    echo
+    echo '[-#-] INSTALANDO O SISTEMA BASE'
+    pacstrap /mnt base base-devel --noconfirm 1> /dev/null || ERR=1
+
+
+    if [[ $ERR -eq 1 ]]; then
+        echo
+        echo '[ ! ] ERRO AO INSTALAR O SISTEMA'
+        exit 1
+    fi
+}
+
 # Chamada das Funções
 clear
 iniciar
 particionar_hd
 formatar_particao
 montar_particao
+#instalar_sistema
