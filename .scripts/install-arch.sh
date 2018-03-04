@@ -29,7 +29,6 @@ HOME_END="100%"
 
 # Configurações da Região
 KEYBOARD_LAYOUT="br abnt2"
-MIRROR="Server = http://linorg.usp.br/archlinux/\$repo/os/\$arch"
 LANGUAGE="pt_BR"
 TIMEZONE="America/Sao_Paulo"
 NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org``\\nFallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
@@ -51,7 +50,6 @@ iniciar() {
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
-    # sed -i "1i $MIRROR" /etc/pacman.d/mirrorlist
     cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
     sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
@@ -131,8 +129,8 @@ montar_particao(){
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
-    mkdir -p /mnt/boot
-    mount "${HD}1" /mnt/boot 1> /dev/null || ERR=1
+    mkdir -p /mnt/boot/efi
+    mount "${HD}1" /mnt/boot/efi 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
