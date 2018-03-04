@@ -1,5 +1,5 @@
 # Espaço entre as janelas
-gaps inner 15
+gaps inner 5
 gaps outer 15
 
 # Definição da tecla super
@@ -85,6 +85,7 @@ bindsym $mod+a focus parent
 #############################################################
 ######################## C O R E S ##########################
 #############################################################
+
 # class                 border      backgr.     text        indicator   child_border
 client.focused          #101e6d     #101e6d     #ffffff     #2e9ef4     #101e6d
 client.focused_inactive #132a4c     #132a4c     #888888     #132a4c     #132a4c
@@ -144,11 +145,10 @@ bindsym Mod1+Tab exec rofi -show window
 bindsym $mod+Control+Right workspace next
 bindsym $mod+Control+Left workspace prev
 
-############### F I M - W O R K S P A C E S #########################
-
 #############################################################
 ############### R U L E S ###################################
 #############################################################
+
 for_window [urgent="latest"] focus
 
 for_window [window_role="pop-up"] floating enable, move position center
@@ -158,10 +158,12 @@ for_window [window_role="Preferences"] floating enable, move position center
 for_window [window_type="dialog"] floating enable, move position center
 for_window [window_type="menu"] floating enable, move position center
 for_window [class="Spotify"] move to workspace $w9
+for_window [class="qjackctl"] floating enable, move position top,left
 
 assign [class="Google-chrome"] $w1
 assign [class="^Telegram"] $w2
 assign [class="Termite"] $w3
+for_window [class="Termite"] floating enable, move position center
 assign [class="^Thunar"] $w4
 for_window [class="^Thunar"] floating enable, move position center
 for_window [class="^Personalizar"] floating enable, move position center
@@ -175,10 +177,6 @@ bindsym $mod+Shift+c reload
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
-
-# exit i3 (logs you out of your X session)
-#bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
-
 
 mode "[s]air, [d]esligar, [r]einiciar, [s]uspender" {
 	bindsym s exec i3-msg exit
@@ -219,17 +217,13 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-#bar {
-    #i3bar_command $HOME/.config/polybar/launch.sh
-    #status_command i3blocks -c $HOME/.config/i3blocks/meui3blocks.conf
-#}
-
-# Remove blue window bar i3 uses
-for_window [class="^.*"] border pixel 4
+# Aumenta o tamanho da borda
+for_window [class="^.*"] border pixel 2
 
 #############################################################
 ##################### I N I C I A R #########################
 #############################################################
+
 exec_always "nitrogen --restore"
 exec_always --no-startup-id "~/.config/polybar/launch.sh"
 exec --no-startup-id "thunar --daemon"
@@ -239,7 +233,7 @@ exec --no-startup-id "nm-applet"
 exec --no-startup-id "numlockx on"
 exec --no-startup-id "synclient VertEdgeScroll=1 HorizEdgeScroll=1 TapButton1=1 TapButton2=3 TapButton3=2"
 
-################# F I M - I N I C I A R #####################
+###################### FIM - INICIAR #######################
 
 
 
@@ -259,8 +253,3 @@ bindsym XF86AudioMute exec "pactl set-sink-mute 0 toggle"
 # Brilho da tela.
 bindsym XF86MonBrightnessUp "exec xbacklight -inc 20"
 bindsym XF86MonBrightnessDown "exec xbacklight -dec 20"
-
-# Terminal corrent WS
-bindsym $mod+Shift+Return exec --no-startup-id "$TERMINAL; i3-msg \"move window to workspace 4\""
-
-

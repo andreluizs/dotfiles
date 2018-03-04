@@ -60,8 +60,8 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 0% 512MB 1>/dev/null || ERR=1
-    parted $HD set 1 boot on 1>/dev/null || ERR=1
+    parted $HD mkpart primary fat32 0% 512MB echo $?
+    parted $HD set 1 boot on echo $?
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
@@ -83,10 +83,6 @@ particionar_hd(){
 
 }
 
-
-    # echo 
-    # echo '[#]------ ATUALIZANDO O SISTEMA ------[#]'
-    # pacman -Syu 1>/dev/null || ERR=1
     
 formatar_particao(){
     local ERR=0
@@ -111,6 +107,26 @@ formatar_particao(){
    if [[ $ERR -eq 1 ]]; then
         echo
         echo '[ ! ] ERRO AO FORMATAR AS PARTIÇÕES'
+        exit 1
+    fi
+
+}
+
+montar_particao(){
+    local ERR=0
+
+    echo
+    echo '[-#-] MONTANDO PARTIÇÃO /BOOT'
+
+    echo
+    echo '[-#-] MONTANDO PARTIÇÃO /ROOT'
+
+    echo
+    echo '[-#-] MONTANDO PARTIÇÃO /HOME'
+
+    if [[ $ERR -eq 1 ]]; then
+        echo
+        echo '[ ! ] ERRO AO MONTAR AS PARTIÇÕES'
         exit 1
     fi
 
