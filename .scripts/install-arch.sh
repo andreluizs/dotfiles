@@ -125,7 +125,7 @@ montar_particao(){
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
-    mount $HD'1' /mnt/boot > /dev/null || ERR=1
+    mount $HD'1' /mnt/boot 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
