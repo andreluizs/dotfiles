@@ -95,15 +95,14 @@ formatar_particao(){
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
     mkswap $HD'2' 1>/dev/null || ERR=1
-    swapon $HD'2' 1>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
-    mkfs.ext4 $HD'3' -L ROOT 1>/dev/null || ERR=1
+    mkfs.ext4 $HD'3' -L ROOT 2>/dev/null || ERR=1
 
     echo
     echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
-    mkfs.ext4 $HD'4' -L HOME 1>/dev/null || ERR=1
+    mkfs.ext4 $HD'4' -L HOME 2>/dev/null || ERR=1
    
    if [[ $ERR -eq 1 ]]; then
         echo
@@ -117,13 +116,17 @@ montar_particao(){
     local ERR=0
 
     echo
-    echo '[-#-] MONTANDO PARTIÇÃO /BOOT'
+    echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
 
     echo
-    echo '[-#-] MONTANDO PARTIÇÃO /ROOT'
+    echo '[-#-] HABILITANDO A PARTIÇÃO SWAP'
+    swapon $HD'2' 1>/dev/null || ERR=1
 
     echo
-    echo '[-#-] MONTANDO PARTIÇÃO /HOME'
+    echo '[-#-] MONTANDO A PARTIÇÃO /ROOT'
+
+    echo
+    echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
 
     if [[ $ERR -eq 1 ]]; then
         echo
@@ -138,3 +141,4 @@ clear
 iniciar
 particionar_hd
 formatar_particao
+montar_particao
