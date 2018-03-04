@@ -44,7 +44,7 @@ iniciar() {
 
     echo
     echo '[-#-] CONFIGURANDO O TECLADO'
-    localectl set-x11-keymap "$KEYBOARD_LAYOUT"
+    localectl set-x11-keymap "${KEYBOARD_LAYOUT}"
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
@@ -61,20 +61,20 @@ particionar_hd(){
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
-    parted $HD mkpart primary fat32 "${BOOT_START}MB" "${BOOT_END}MB" 2> /dev/null || ERR=1
+    parted $HD mkpart primary fat32 "${BOOT_START}MiB" "${BOOT_END}MiB" 2> /dev/null || ERR=1
     parted $HD set 1 boot on 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
-    parted $HD mkpart primary linux-swap "${SWAP_START}MB" "${SWAP_END}MB" 2> /dev/null || ERR=1
+    parted $HD mkpart primary linux-swap "${SWAP_START}MiB" "${SWAP_END}MiB" 2> /dev/null || ERR=1
     
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
-    parted $HD mkpart primary ext4 "${ROOT_START}MB" "${ROOT_END}MB" 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "${ROOT_START}MiB" "${ROOT_END}MiB" 2> /dev/null || ERR=1
 
     echo
     echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
-    parted $HD mkpart primary ext4 "${HOME_START}MB" "$HOME_END" 2> /dev/null || ERR=1
+    parted $HD mkpart primary ext4 "${HOME_START}MiB" "$HOME_END" 2> /dev/null || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
         echo
