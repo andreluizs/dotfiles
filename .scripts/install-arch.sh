@@ -52,10 +52,6 @@ iniciar() {
     echo '[-#-] CONFIGURANDO O MIRROR'
     sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist > /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
-    # cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
-    # sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
-    # rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
-    
 }
 
 particionar_hd(){
@@ -175,7 +171,6 @@ configurar_sistema(){
     echo
     echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
     (
-        arch-chroot /mnt
         echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
         sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
         locale-gen
@@ -195,7 +190,8 @@ configurar_sistema(){
         echo "${USER}:${USER_PASSWD}" | chpasswd
         echo "root:${ROOT_PASSWD}" | chpasswd
         bootctl install "$HD"
-        mkdir -p /boot/loader && mkdir -p /boot/loader/entries
+        # mkdir -p /boot/loader 
+        # mkdir -p /boot/loader/entries
         echo -e "$LOADER_CONF" > /boot/loader/loader.conf
         echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
     ) || ERR=1
@@ -218,4 +214,4 @@ particionar_hd
 formatar_particao
 montar_particao
 instalar_sistema
-configurar_sistema
+arch-chroot /mnt <<EOF configurar_sistema
