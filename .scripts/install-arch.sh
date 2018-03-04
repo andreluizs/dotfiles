@@ -50,9 +50,11 @@ iniciar() {
     
     echo
     echo '[-#-] CONFIGURANDO O MIRROR'
-    cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
-    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
+    sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist > /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
+    # cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+    # sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
+    # rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
     
 }
 
@@ -129,8 +131,8 @@ montar_particao(){
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
-    mkdir -p /mnt/boot/efi
-    mount "${HD}1" /mnt/boot/efi 1> /dev/null || ERR=1
+    mkdir -p /mnt/boot
+    mount "${HD}1" /mnt/boot 1> /dev/null || ERR=1
 
     echo
     echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
