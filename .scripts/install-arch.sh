@@ -185,7 +185,7 @@ configurar_sistema(){
         arch-chroot /mnt echo "$HOST" > /etc/hostname
         arch-chroot /mnt pacman -S networkmanager --needed --noconfirm
         arch-chroot /mnt systemctl enable NetworkManager
-        useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
+        arch-chroot /mnt useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
         arch-chroot /mnt sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
         arch-chroot /mnt echo "${USER}:${USER_PASSWD}" | chpasswd
         arch-chroot /mnt echo "root:${ROOT_PASSWD}" | chpasswd
