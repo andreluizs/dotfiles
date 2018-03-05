@@ -183,7 +183,7 @@ arch-chroot /mnt /bin/bash << arch-install-chroot
     export LANG=pt_BR.UTF-8
     timedatectl set-timezone "$TIMEZONE"
     hwclock -w -u
-    echo -e "$NTP"
+    echo -e "$NTP" >> /etc/systemd/timesyncd.conf
     sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
     pacman -Sy
     pacman-key --init && pacman-key --populate archlinux
@@ -194,7 +194,7 @@ arch-chroot /mnt /bin/bash << arch-install-chroot
     sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
     echo "${USER}:${USER_PASSWD}" | chpasswd
     echo "root:${ROOT_PASSWD}" | chpasswd
-    # bootctl install "$HD"
+    bootctl install "$HD"
     # mkdir -p /boot/loader 
     # mkdir -p /boot/loader/entries
     echo -e "$LOADER_CONF" > /boot/loader/loader.conf
