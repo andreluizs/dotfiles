@@ -165,48 +165,6 @@ instalar_sistema(){
     fi
 }
 
-configurar_sistema(){
-    local ERR=0
-    
-    echo
-    echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
-    (
-        arch-chroot /mnt echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
-        arch-chroot /mnt sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
-        arch-chroot /mnt locale-gen
-        arch-chroot /mnt echo LANG=pt_BR.UTF-8 > /etc/locale.conf
-        arch-chroot /mnt export LANG=pt_BR.UTF-8 
-        arch-chroot /mnt timedatectl set-timezone "$TIMEZONE"
-        arch-chroot /mnt hwclock -w -u
-        arch-chroot /mnt echo -e "$NTP"
-        arch-chroot /mnt sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
-        arch-chroot /mnt pacman -Sy
-        arch-chroot /mnt pacman-key --init && pacman-key --populate archlinux
-        arch-chroot /mnt echo "$HOST" > /etc/hostname
-        # arch-chroot /mnt pacman -S networkmanager --needed --noconfirm
-        # arch-chroot /mnt systemctl enable NetworkManager
-        # arch-chroot /mnt useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
-        # arch-chroot /mnt sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
-        # arch-chroot /mnt echo "${USER}:${USER_PASSWD}" | chpasswd
-        # arch-chroot /mnt echo "root:${ROOT_PASSWD}" | chpasswd
-        # arch-chroot /mnt bootctl install "$HD"
-        # arch-chroot /mnt mkdir -p /boot/loader 
-        # arch-chroot /mnt mkdir -p /boot/loader/entries
-        # arch-chroot /mnt echo -e "$LOADER_CONF" > /boot/loader/loader.conf
-        # arch-chroot /mnt echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
-    ) || ERR=1
-
-    echo 
-    echo '[-#-] FIM'
-
-
-    if [[ $ERR -eq 1 ]]; then
-        echo
-        echo '[ ! ] ERRO AO CONFIGURAR O SISTEMA'
-        exit 1
-    fi
-}
-
 # Chamada das Funções
 clear
 iniciar
@@ -214,4 +172,32 @@ particionar_hd
 formatar_particao
 montar_particao
 instalar_sistema
-configurar_sistema
+
+echo
+echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
+arch-chroot /mnt << EOF
+echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
+sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
+locale-gen
+echo LANG=pt_BR.UTF-8 > /etc/locale.conf
+export LANG=pt_BR.UTF-8
+timedatectl set-timezone "$TIMEZONE"
+hwclock -w -u
+echo -e "$NTP"
+sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
+pacman -Sy
+pacman-key --init && pacman-key --populate archlinux
+echo "$HOST" > /etc/hostname
+# pacman -S networkmanager --needed --noconfirm
+# systemctl enable NetworkManager
+useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
+sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
+echo "${USER}:${USER_PASSWD}" | chpasswd
+echo "root:${ROOT_PASSWD}" | chpasswd
+# bootctl install "$HD"
+# mkdir -p /boot/loader 
+# mkdir -p /boot/loader/entries
+# echo -e "$LOADER_CONF" > /boot/loader/loader.conf
+# echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
+echo 
+echo '[-#-] FIM'
