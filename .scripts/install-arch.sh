@@ -183,17 +183,17 @@ configurar_sistema(){
         arch-chroot /mnt pacman -Sy
         arch-chroot /mnt pacman-key --init && pacman-key --populate archlinux
         arch-chroot /mnt echo "$HOST" > /etc/hostname
-        arch-chroot /mnt pacman -S networkmanager --needed --noconfirm
-        arch-chroot /mnt systemctl enable NetworkManager
-        arch-chroot /mnt useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
-        arch-chroot /mnt sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
-        arch-chroot /mnt echo "${USER}:${USER_PASSWD}" | chpasswd
-        arch-chroot /mnt echo "root:${ROOT_PASSWD}" | chpasswd
-        arch-chroot /mnt bootctl install "$HD"
-        arch-chroot /mnt mkdir -p /boot/loader 
-        arch-chroot /mnt mkdir -p /boot/loader/entries
-        arch-chroot /mnt echo -e "$LOADER_CONF" > /boot/loader/loader.conf
-        arch-chroot /mnt echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
+        # arch-chroot /mnt pacman -S networkmanager --needed --noconfirm
+        # arch-chroot /mnt systemctl enable NetworkManager
+        # arch-chroot /mnt useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
+        # arch-chroot /mnt sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
+        # arch-chroot /mnt echo "${USER}:${USER_PASSWD}" | chpasswd
+        # arch-chroot /mnt echo "root:${ROOT_PASSWD}" | chpasswd
+        # arch-chroot /mnt bootctl install "$HD"
+        # arch-chroot /mnt mkdir -p /boot/loader 
+        # arch-chroot /mnt mkdir -p /boot/loader/entries
+        # arch-chroot /mnt echo -e "$LOADER_CONF" > /boot/loader/loader.conf
+        # arch-chroot /mnt echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
     ) || ERR=1
 
     echo 
