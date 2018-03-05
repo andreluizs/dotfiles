@@ -214,3 +214,4 @@ particionar_hd
 formatar_particao
 montar_particao
 instalar_sistema
+configurar_sistema
