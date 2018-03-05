@@ -175,29 +175,30 @@ instalar_sistema
 
 echo
 echo '[-#-] CONFIGURANDO O NOVO SISTEMA'
-arch-chroot /mnt << EOF
-echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
-sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
-locale-gen
-echo LANG=pt_BR.UTF-8 > /etc/locale.conf
-export LANG=pt_BR.UTF-8
-timedatectl set-timezone "$TIMEZONE"
-hwclock -w -u
-echo -e "$NTP"
-sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
-pacman -Sy
-pacman-key --init && pacman-key --populate archlinux
-echo "$HOST" > /etc/hostname
-# pacman -S networkmanager --needed --noconfirm
-# systemctl enable NetworkManager
-useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
-sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
-echo "${USER}:${USER_PASSWD}" | chpasswd
-echo "root:${ROOT_PASSWD}" | chpasswd
-# bootctl install "$HD"
-# mkdir -p /boot/loader 
-# mkdir -p /boot/loader/entries
-# echo -e "$LOADER_CONF" > /boot/loader/loader.conf
-# echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
-echo 
-echo '[-#-] FIM'
+arch-chroot /mnt /bin/bash << arch-install-chroot
+    echo -e "KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=" > /etc/vconsole.conf
+    sed -i  '/pt_BR/,+1 s/^#//' /etc/locale.gen
+    locale-gen
+    echo LANG=pt_BR.UTF-8 > /etc/locale.conf
+    export LANG=pt_BR.UTF-8
+    timedatectl set-timezone "$TIMEZONE"
+    hwclock -w -u
+    echo -e "$NTP"
+    sed -i  '/multilib\]/,+1  s/^#//'  /etc/pacman.conf
+    pacman -Sy
+    pacman-key --init && pacman-key --populate archlinux
+    echo "$HOST" > /etc/hostname
+    # pacman -S networkmanager --needed --noconfirm
+    # systemctl enable NetworkManager
+    useradd -m -g users -G wheel -c "$USER_NAME" -s /bin/bash "$USER"
+    sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
+    echo "${USER}:${USER_PASSWD}" | chpasswd
+    echo "root:${ROOT_PASSWD}" | chpasswd
+    # bootctl install "$HD"
+    # mkdir -p /boot/loader 
+    # mkdir -p /boot/loader/entries
+    echo -e "$LOADER_CONF" > /boot/loader/loader.conf
+    echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
+    echo 
+    echo '[-#-] FIM'
+arch-install-chroot
