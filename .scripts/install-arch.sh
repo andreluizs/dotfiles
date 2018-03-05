@@ -190,8 +190,8 @@ configurar_sistema(){
         arch-chroot /mnt echo "${USER}:${USER_PASSWD}" | chpasswd
         arch-chroot /mnt echo "root:${ROOT_PASSWD}" | chpasswd
         arch-chroot /mnt bootctl install "$HD"
-        # mkdir -p /boot/loader 
-        # mkdir -p /boot/loader/entries
+        arch-chroot /mnt mkdir -p /boot/loader 
+        arch-chroot /mnt mkdir -p /boot/loader/entries
         arch-chroot /mnt echo -e "$LOADER_CONF" > /boot/loader/loader.conf
         arch-chroot /mnt echo -e "$ARCH_ENTRIE" > /boot/loader/entries/arch.conf
     ) || ERR=1
