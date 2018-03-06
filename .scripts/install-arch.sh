@@ -1,4 +1,17 @@
 #!/bin/bash
+#===============================================================================
+#
+#          FILE: install-arch.sh
+#
+#         USAGE: ./install-arch.sh
+#
+#   DESCRIPTION: Script para realizar a instalação do Arch Linux.
+#
+#        AUTHOR: André Luiz dos Santos (andreluizs@live.com),
+#       CREATED: 06/03/2018
+#      REVISION: 1.00
+#===============================================================================
+
 set -o errexit
 set -o pipefail
 
@@ -37,19 +50,24 @@ LOADER_CONF="timeout 2\\ndefault arch"
 ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
 
 # Funções
+msg_info() {
+    echo "[INFO] $1"
+}
+
+msg_erro() {
+    echo "[ERRO] $1"
+}
+
 iniciar() {
     local ERR=0
 
-    echo
-    echo '[-#-] CONFIGURANDO A HORA'
+    msg_info 'Sincronizando a hora.'
     timedatectl set-ntp true
 
-    echo
-    echo '[-#-] CONFIGURANDO O TECLADO'
+    msg_info "Definindo o teclado para: $KEYBOARD_LAYOUT."
     localectl set-x11-keymap "$KEYBOARD_LAYOUT"
 
-    echo
-    echo '[-#-] CONFIGURANDO O MIRROR'
+    msg_info 'Procurando o servidor mais rápido.'
     sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist >/etc/pacman.d/mirrorlist.backup
     rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup >/etc/pacman.d/mirrorlist
 }
@@ -57,30 +75,24 @@ iniciar() {
 particionar_hd() {
     local ERR=0
 
-    echo
-    echo '[-#-] CRIANDO A TABELA DE PARTIÇÃO'
+    msg_info 'Definindo a tabela de partição para GPT.'
     parted -s $HD mklabel gpt &>/dev/null
 
-    echo
-    echo '[-#-] CRIANDO A PARTIÇÃO /BOOT'
+    msg_info "Criando a partição /boot com ${BOOT_SIZE}MB."
     parted $HD mkpart ESP fat32 "${BOOT_START}MiB" "${BOOT_END}MiB" 2>/dev/null  || ERR=1
     parted $HD set 1 boot on 2>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] CRIANDO A PARTIÇÃO SWAP'
+    msg_info "Criando a partição swap com ${SWAP_SIZE}MB."
     parted $HD mkpart primary linux-swap "${SWAP_START}MiB" "${SWAP_END}MiB" 2>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] CRIANDO A PARTIÇÃO /ROOT'
+    msg_info "Criando a partição /root com ${ROOT_SIZE}MB."
     parted $HD mkpart primary ext4 "${ROOT_START}MiB" "${ROOT_END}MiB" 2>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] CRIANDO A PARTIÇÃO /HOME'
+    msg_info 'Criando a partição /home com o restante do HD.'
     parted $HD mkpart primary ext4 "${HOME_START}MiB" "$HOME_END" 2>/dev/null  || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
-        echo
-        echo '[ ! ] ERRO AO CRIAR AS PARTIÇÕES'
+        msg_erro "Ocorreu um erro ao tentar particionar o HD."
         exit 1
     fi
 
@@ -89,25 +101,20 @@ particionar_hd() {
 formatar_particao() {
     local ERR=0
 
-    echo
-    echo '[-#-] FORMATANDO A PARTIÇÃO /BOOT'
+    msg_info 'Formatando a partição /boot.'
     mkfs.vfat -F32 "${HD}1" -n BOOT 1>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] FORMATANDO A PARTIÇÃO SWAP'
+    msg_info 'Formatando a partição swap.'
     mkswap "${HD}2" 1>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] FORMATANDO A PARTIÇÃO /ROOT'
+    msg_info 'Formatando a partição /root.'
     mkfs.ext4 "${HD}3" -L ROOT &>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] FORMATANDO A PARTIÇÃO /HOME'
+    msg_info 'Formatando a partição /home.'
     mkfs.ext4 "${HD}4" -L HOME &>/dev/null  || ERR=1
 
     if [[ $ERR -eq 1 ]]; then
-        echo
-        echo '[ ! ] ERRO AO FORMATAR AS PARTIÇÕES'
+        msg_erro "Ocorreu um erro ao tentar formatar as partições."
         exit 1
     fi
 
@@ -116,31 +123,26 @@ formatar_particao() {
 montar_particao() {
     local ERR=0
 
-    echo
-    echo '[-#-] HABILITANDO A PARTIÇÃO SWAP'
+    msg_info 'Montando a partição swap.'
     swapon "${HD}2" 1>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] MONTANDO A PARTIÇÃO /ROOT'
+    msg_info 'Montando a partição /root.'
     mount "${HD}3" /mnt 1>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] MONTANDO A PARTIÇÃO /BOOT'
+    msg_info 'Montando a partição /boot.'
     mkdir -p /mnt/boot
     mount "${HD}1" /mnt/boot 1>/dev/null  || ERR=1
 
-    echo
-    echo '[-#-] MONTANDO A PARTIÇÃO /HOME'
+    msg_info 'Montando a partição /home.'
     mkdir /mnt/home
     mount "${HD}4" /mnt/home 1>/dev/null  || ERR=1
 
     echo
-    echo "---------------RESULTADO------------------"
+    echo "---------------- TABELA ------------------"
     lsblk "$HD"
 
     if [[ $ERR -eq 1 ]]; then
-        echo
-        echo '[ ! ] ERRO AO MONTAR AS PARTIÇÕES'
+        msg_erro "Ocorreu um erro ao tentar montar as partições."
         exit 1
     fi
 
@@ -149,17 +151,14 @@ montar_particao() {
 instalar_sistema() {
     local ERR=0
 
-    echo
-    echo '[-#-] INSTALANDO O SISTEMA BASE'
-    pacstrap /mnt base base-devel &>/dev/null  || ERR=1
+    msg_info "Instalando o sistema base."
+    pacstrap /mnt base base-devel &> /dev/null || ERR=1
 
-    echo
-    echo '[-#-] GERANDO O FSTAB'
-    genfstab -p -L /mnt >>/mnt/etc/fstab
+    msg_info "Gerando o fstab."
+    genfstab -p -L /mnt >> /mnt/etc/fstab
 
     if [[ $ERR -eq 1 ]]; then
-        echo
-        echo '[ ! ] ERRO AO INSTALAR O SISTEMA'
+        msg_erro "Ocorreu um erro ao tentar instalar o sistema."
         exit 1
     fi
 }
