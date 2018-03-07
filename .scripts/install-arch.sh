@@ -44,22 +44,43 @@ HOME_END="100%"
 KEYBOARD_LAYOUT="br abnt2"
 LANGUAGE="pt_BR"
 TIMEZONE="America/Sao_Paulo"
-NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org\\nFallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
+NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org
+FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 LOADER_CONF="timeout 0\\ndefault arch"
 ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
 
+# Cores
+VERDE='\e[32m'
+VERMELHO='\e[31m'
+NEGRITO='\e[1m'
+SEMCOR='\e[0m'
+
 # Funções
 function msg_info() {
-    echo "[INFO] $1"
+    echo -e "${VERDE}${NEGRITO}[INFO]${SEMCOR} $1"
 }
 
 function msg_erro() {
-    echo "[ERRO] $1"
+    echo -e "${VERMELHO}${NEGRITO}[ERRO]${SEMCOR} $1"
 }
 
 function run_on_chroot() {
     arch-chroot /mnt /bin/bash -c "$1"
+}
+
+function spinner() {
+    local pid=$1
+    local delay=0.75
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
 }
 
 function iniciar() {
@@ -128,8 +149,8 @@ function formatar_particao() {
 
 function montar_particao() {
     local ERR=0
-    
-    echo 
+
+    echo
     msg_info 'Montando a partição swap.'
     swapon "${HD}2" 1> /dev/null || ERR=1
 
@@ -160,8 +181,8 @@ function instalar_sistema() {
 
     echo
     msg_info "Instalando o sistema base."
-    pacstrap /mnt base base-devel &> /dev/null || ERR=1
-
+    (pacstrap /mnt base base-devel &> /dev/null) & spinner $!
+    
     msg_info "Gerando o fstab."
     genfstab -p -L /mnt >> /mnt/etc/fstab
 
@@ -171,8 +192,6 @@ function instalar_sistema() {
     fi
 }
 
-
-
 function configurar_sistema() {
 
     echo
@@ -181,15 +200,15 @@ function configurar_sistema() {
     msg_info 'Configurando o teclado e o idioma para pt_BR.'
     run_on_chroot "echo -e KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP= > /etc/vconsole.conf"
     run_on_chroot "sed -i '/pt_BR/,+1 s/^#//' /etc/locale.gen"
-    run_on_chroot "locale-gen" 1> /dev/null 
-    run_on_chroot "echo LANG=pt_BR.UTF-8 >/etc/locale.conf"
+    run_on_chroot "locale-gen" 1> /dev/null
+    run_on_chroot "echo LANG=pt_BR.UTF-8 > /etc/locale.conf"
     run_on_chroot "export LANG=pt_BR.UTF-8"
 
     # Hora
     msg_info "Configurando o horário para a região ${TIMEZONE}."
     run_on_chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
     run_on_chroot "hwclock -w -u"
-    run_on_chroot "echo -e $NTP >> /etc/systemd/timesyncd.conf"
+    run_on_chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
 
     # Multilib
     msg_info 'Habilitando o repositório multilib.'
@@ -197,34 +216,34 @@ function configurar_sistema() {
 
     msg_info 'Sincronizando repositório.'
     run_on_chroot "pacman -Sy" 1> /dev/null
-    
+
     msg_info 'Populando as chaves dos respositórios.'
-    run_on_chroot "pacman-key --init && pacman-key --populate archlinux" 1> /dev/null
+    run_on_chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
 
     # Rede
     msg_info "Configurando o nome da maquina para: $HOST."
-    run_on_chroot "echo $HOST >/etc/hostname"
-    
+    run_on_chroot "echo $HOST > /etc/hostname"
+
     msg_info 'Instalando e habilitando o NetworkManager.'
     run_on_chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
-    run_on_chroot "systemctl enable NetworkManager" 1> /dev/null
+    run_on_chroot "systemctl enable NetworkManager" 2> /dev/null
 
     # Usuario
-    msg_info "Criando o usuário $USER_NAME."
+    msg_info "Criando o usuário ${NEGRITO}$USER_NAME${SEMCOR}."
     run_on_chroot "useradd -m -g users -G wheel -c \"$USER_NAME\" -s /bin/bash $USER"
-    
-    msg_info "Adicionando o usuario: $USER_NAME ao grupo sudoers."
+
+    msg_info "Adicionando o usuario: ${NEGRITO}$USER_NAME${SEMCOR} ao grupo sudoers."
     run_on_chroot "sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers"
-    
-    msg_info "Definindo a senha do usuário $USER_NAME."
+
+    msg_info "Definindo a senha do usuário ${NEGRITO}$USER_NAME${SEMCOR}."
     run_on_chroot "echo ${USER}:${USER_PASSWD} | chpasswd"
-    
-    msg_info 'Definindo a senha do usuário root.'
+
+    msg_info "Definindo a senha do usuário ${NEGRITO}Root${SEMCOR}."
     run_on_chroot "echo root:${ROOT_PASSWD} | chpasswd"
 
     # Bootloader
     msg_info 'Instalando o bootloader.'
-    run_on_chroot "bootctl install"
+    run_on_chroot "bootctl install" 2> /dev/null
     run_on_chroot "echo -e $LOADER_CONF > /boot/loader/loader.conf"
     run_on_chroot "echo -e $ARCH_ENTRIE > /boot/loader/entries/arch.conf"
 
