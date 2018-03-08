@@ -15,30 +15,34 @@
 set -o errexit
 set -o pipefail
 
-# Dados pessoais.
-USER="andre"
-USER_NAME="André Luiz"
-USER_PASSWD="andre"
-ROOT_PASSWD="root"
-HOST="arch-note"
+#===============================================================================
+#---------------------------------VARIAVEIS-------------------------------------
+#===============================================================================
+# Cores
+readonly VERMELHO='\e[31m\e[1m'
+readonly VERDE='\e[32m\e[1m'
+readonly AMARELO='\e[33m\e[1m'
+readonly AZUL='\e[34m\e[1m'
+readonly MAGENTA='\e[35m\e[1m'
+readonly NEGRITO='\e[1m'
+readonly SEMCOR='\e[0m'
 
-# Dados do HD
-HD=/dev/sda
+# Usuário
+MY_USER=${MY_USER:-'andre'}
+MY_USER_NAME=${MY_USER_NAME:-'André Luiz'}
+MY_USER_PASSWD=${MY_USER:-'andre'}
+ROOT_PASSWD=${ROOT_PASSWD:-'root'}
+
+# HD
+HD=${HD:-'/dev/sda'}
+
+# Nome da maquina
+HOST=${HOST:-"archlinux"}
 
 # Tamanho das partições em MB
-BOOT_SIZE=512
-SWAP_SIZE=4096
-ROOT_SIZE=30720
-
-# Calculo para criar as partições com o parted
-BOOT_START=1
-BOOT_END=$((BOOT_SIZE + BOOT_START))
-SWAP_START=$BOOT_END
-SWAP_END=$((SWAP_START + SWAP_SIZE))
-ROOT_START=$SWAP_END
-ROOT_END=$((ROOT_START + ROOT_SIZE))
-HOME_START=$ROOT_END
-HOME_END="100%"
+BOOT_SIZE=${BOOT_SIZE:-512}
+SWAP_SIZE=${SWAP_SIZE:-4096}
+ROOT_SIZE=${ROOT_SIZE:-30720}
 
 # Configurações da Região
 KEYBOARD_LAYOUT="br abnt2"
@@ -47,26 +51,32 @@ TIMEZONE="America/Sao_Paulo"
 NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org
 FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
+# Entradas do Bootloader
 LOADER_CONF="timeout 0\\ndefault arch"
 ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
 
-# Cores
-VERDE='\e[32m'
-VERMELHO='\e[31m'
-NEGRITO='\e[1m'
-SEMCOR='\e[0m'
+#===============================================================================
+#----------------------------------FUNÇÕES--------------------------------------
+#===============================================================================
 
-# Funções
-function msg_info() {
-    echo -e "${VERDE}${NEGRITO}[INFO]${SEMCOR} $1"
+function _msg() {
+    case $1 in
+    info)       cor="${VERDE}[I]${SEMCOR}" ;;
+    erro)       cor="${VERMELHO}[E]${SEMCOR}" ;;
+    quest)      cor="${AZUL}[Q]${SEMCOR}" ;;
+    esac
+    echo -e "${cor} ${2}"
 }
 
-function msg_erro() {
-    echo -e "${VERMELHO}${NEGRITO}[ERRO]${SEMCOR} $1"
-}
-
-function run_on_chroot() {
+function _chroot() {
     arch-chroot /mnt /bin/bash -c "$1"
+}
+
+function bem_vindo() {
+    echo -e "${NEGRITO}=================================================${SEMCOR}"
+    echo -e "${NEGRITO}BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI${SEMCOR}"
+    echo -e "${NEGRITO}=================================================${SEMCOR}"
+    echo
 }
 
 function spinner() {
@@ -75,7 +85,7 @@ function spinner() {
     local spinstr='|/-\'
     while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
         local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
+        printf "${AMARELO}[%c]${SEMCOR}  " "$spinstr"
         local spinstr=$temp${spinstr%"$temp"}
         sleep $delay
         printf "\b\b\b\b\b\b"
@@ -84,110 +94,147 @@ function spinner() {
 }
 
 function iniciar() {
-    local ERR=0
 
-    msg_info 'Sincronizando a hora.'
+    padrao=${padrao:-s}
+    _msg quest "Gostaria de realizar a instalação padrão? (${NEGRITO}S/${SEMCOR}n):"
+    read -s -en 1 padrao
+
+    if [[ $padrao == "n" ]]; then
+        _msg quest 'Informe o nome completo do usuário:'
+        read MY_USER_NAME
+
+        _msg quest 'Informe o úsuario:'
+        read MY_USER
+
+        _msg quest "Informe o password do usuario: $MY_USER:"
+        read -s MY_USER
+
+        _msg quest "Informe o password do usuario: root:"
+        read -s ROOT_PASSWD
+
+        _msg quest "Informe o device que será instalado ex:[/dev/sda]:"
+        read HD
+
+         _msg quest "Informe o nome da maquina:"
+        read HOST
+    fi
+
+    echo
+    echo -e "${AMARELO}Vá buscar um café, eu cuido do resto!${SEMCOR}"
+    
+    echo
+    _msg info 'Sincronizando a hora.'
     timedatectl set-ntp true
 
-    msg_info "Definindo o teclado para: $KEYBOARD_LAYOUT."
+    _msg info "Definindo o teclado para: $KEYBOARD_LAYOUT."
     localectl set-x11-keymap "$KEYBOARD_LAYOUT"
 
-    msg_info 'Procurando o servidor mais rápido.'
-    sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist > /etc/pacman.d/mirrorlist.backup
-    rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
+    _msg info 'Procurando o servidor mais rápido.'
+    sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist >/etc/pacman.d/mirrorlist.backup
+    rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup >/etc/pacman.d/mirrorlist
 }
 
 function particionar_hd() {
-    local ERR=0
+    local err=0
+
+    # Calculo para criar as partições com o parted
+    local boot_start=1
+    local boot_end=$((BOOT_SIZE + boot_start))
+    local swap_start=$boot_end
+    local swap_end=$((swap_start + SWAP_SIZE))
+    local root_start=$swap_end
+    local root_end=$((root_start + ROOT_SIZE))
+    local home_start=$root_end
+    local home_end="100%"
 
     echo
-    msg_info 'Definindo a tabela de partição para GPT.'
+    _msg info 'Definindo a tabela de partição para GPT.'
     parted -s $HD mklabel gpt &> /dev/null
 
-    msg_info "Criando a partição /boot com ${BOOT_SIZE}MB."
-    parted $HD mkpart ESP fat32 "${BOOT_START}MiB" "${BOOT_END}MiB" 2> /dev/null || ERR=1
-    parted $HD set 1 boot on 2> /dev/null || ERR=1
+    _msg info "Criando a partição /boot com ${BOOT_SIZE}MB."
+    parted $HD mkpart ESP fat32 "${boot_start}MiB" "${boot_end}MiB" 2> /dev/null || err=1
+    parted $HD set 1 boot on 2> /dev/null || err=1
 
-    msg_info "Criando a partição swap com ${SWAP_SIZE}MB."
-    parted $HD mkpart primary linux-swap "${SWAP_START}MiB" "${SWAP_END}MiB" 2> /dev/null || ERR=1
+    _msg info "Criando a partição swap com ${SWAP_SIZE}MB."
+    parted $HD mkpart primary linux-swap "${swap_start}MiB" "${swap_end}MiB" 2> /dev/null || err=1
 
-    msg_info "Criando a partição /root com ${ROOT_SIZE}MB."
-    parted $HD mkpart primary ext4 "${ROOT_START}MiB" "${ROOT_END}MiB" 2> /dev/null || ERR=1
+    _msg info "Criando a partição /root com ${ROOT_SIZE}MB."
+    parted $HD mkpart primary ext4 "${root_start}MiB" "${root_end}MiB" 2> /dev/null || err=1
 
-    msg_info 'Criando a partição /home com o restante do HD.'
-    parted $HD mkpart primary ext4 "${HOME_START}MiB" "$HOME_END" 2> /dev/null || ERR=1
+    _msg info 'Criando a partição /home com o restante do HD.'
+    parted $HD mkpart primary ext4 "${home_start}MiB" "$home_end" 2> /dev/null || err=1
 
-    if [[ $ERR -eq 1 ]]; then
-        msg_erro "Ocorreu um erro ao tentar particionar o HD."
+    if [[ $err -eq 1 ]]; then
+        _msg erro "Ocorreu um erro ao tentar particionar o HD."
         exit 1
     fi
 
 }
 
 function formatar_particao() {
-    local ERR=0
+    local err=0
 
     echo
-    msg_info 'Formatando a partição /boot.'
-    mkfs.vfat -F32 "${HD}1" -n BOOT 1> /dev/null || ERR=1
+    _msg info 'Formatando a partição /boot.'
+    mkfs.vfat -F32 "${HD}1" -n BOOT 1> /dev/null || err=1
 
-    msg_info 'Formatando a partição swap.'
-    mkswap "${HD}2" 1> /dev/null || ERR=1
+    _msg info 'Formatando a partição swap.'
+    mkswap "${HD}2" 1> /dev/null || err=1
 
-    msg_info 'Formatando a partição /root.'
-    mkfs.ext4 "${HD}3" -L ROOT &> /dev/null || ERR=1
+    _msg info 'Formatando a partição /root.'
+    mkfs.ext4 "${HD}3" -L ROOT &> /dev/null || err=1
 
-    msg_info 'Formatando a partição /home.'
-    mkfs.ext4 "${HD}4" -L HOME &> /dev/null || ERR=1
+    _msg info 'Formatando a partição /home.'
+    mkfs.ext4 "${HD}4" -L HOME &> /dev/null || err=1
 
-    if [[ $ERR -eq 1 ]]; then
-        msg_erro "Ocorreu um erro ao tentar formatar as partições."
+    if [[ $err -eq 1 ]]; then
+        _msg erro "Ocorreu um erro ao tentar formatar as partições."
         exit 1
     fi
 
 }
 
 function montar_particao() {
-    local ERR=0
+    local err=0
 
     echo
-    msg_info 'Montando a partição swap.'
-    swapon "${HD}2" 1> /dev/null || ERR=1
+    _msg info 'Montando a partição swap.'
+    swapon "${HD}2" 1> /dev/null || err=1
 
-    msg_info 'Montando a partição /root.'
-    mount "${HD}3" /mnt 1> /dev/null || ERR=1
+    _msg info 'Montando a partição /root.'
+    mount "${HD}3" /mnt 1> /dev/null || err=1
 
-    msg_info 'Montando a partição /boot.'
+    _msg info 'Montando a partição /boot.'
     mkdir -p /mnt/boot
-    mount "${HD}1" /mnt/boot 1> /dev/null || ERR=1
+    mount "${HD}1" /mnt/boot 1> /dev/null || err=1
 
-    msg_info 'Montando a partição /home.'
+    _msg info 'Montando a partição /home.'
     mkdir /mnt/home
-    mount "${HD}4" /mnt/home 1> /dev/null || ERR=1
+    mount "${HD}4" /mnt/home 1> /dev/null || err=1
 
     echo
-    echo "---------------- TABELA ------------------"
+    echo -e "================= ${AZUL}TABELA${SEMCOR} ================="
     lsblk "$HD"
 
-    if [[ $ERR -eq 1 ]]; then
-        msg_erro "Ocorreu um erro ao tentar montar as partições."
+    if [[ $err -eq 1 ]]; then
+        _msg erro "Ocorreu um erro ao tentar montar as partições."
         exit 1
     fi
 
 }
 
 function instalar_sistema() {
-    local ERR=0
+    local err=0
 
     echo
-    msg_info "Instalando o sistema base."
-    (pacstrap /mnt base base-devel &> /dev/null) & spinner $!
-    
-    msg_info "Gerando o fstab."
+    (pacstrap /mnt base base-devel &> /dev/null) & 
+    echo 'Instalando o sistema base.' spinner $! 
+
+    _msg info "Gerando o fstab."
     genfstab -p -L /mnt >> /mnt/etc/fstab
 
-    if [[ $ERR -eq 1 ]]; then
-        msg_erro "Ocorreu um erro ao tentar instalar o sistema."
+    if [[ $err -eq 1 ]]; then
+        _msg erro "Ocorreu um erro ao tentar instalar o sistema."
         exit 1
     fi
 }
@@ -195,65 +242,66 @@ function instalar_sistema() {
 function configurar_sistema() {
 
     echo
-    msg_info 'Entrando no novo sistema.'
+    _msg info 'Entrando no novo sistema.'
 
-    msg_info 'Configurando o teclado e o idioma para pt_BR.'
-    run_on_chroot "echo -e KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP= > /etc/vconsole.conf"
-    run_on_chroot "sed -i '/pt_BR/,+1 s/^#//' /etc/locale.gen"
-    run_on_chroot "locale-gen" 1> /dev/null
-    run_on_chroot "echo LANG=pt_BR.UTF-8 > /etc/locale.conf"
-    run_on_chroot "export LANG=pt_BR.UTF-8"
+    _msg info 'Configurando o teclado e o idioma para pt_BR.'
+    _chroot "echo -e KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP= > /etc/vconsole.conf"
+    _chroot "sed -i '/pt_BR/,+1 s/^#//' /etc/locale.gen"
+    _chroot "locale-gen" 1> /dev/null
+    _chroot "echo LANG=pt_BR.UTF-8 > /etc/locale.conf"
+    _chroot "export LANG=pt_BR.UTF-8"
 
     # Hora
-    msg_info "Configurando o horário para a região ${TIMEZONE}."
-    run_on_chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
-    run_on_chroot "hwclock -w -u"
-    run_on_chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
+    _msg info "Configurando o horário para a região ${TIMEZONE}."
+    _chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
+    _chroot "hwclock -w -u"
+    _chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
 
     # Multilib
-    msg_info 'Habilitando o repositório multilib.'
-    run_on_chroot "sed -i '/multilib\]/,+1  s/^#//' /etc/pacman.conf"
+    _msg info 'Habilitando o repositório multilib.'
+    _chroot "sed -i '/multilib\]/,+1  s/^#//' /etc/pacman.conf"
 
-    msg_info 'Sincronizando repositório.'
-    run_on_chroot "pacman -Sy" 1> /dev/null
+    _msg info 'Sincronizando repositório.'
+    _chroot "pacman -Sy" 1> /dev/null
 
-    msg_info 'Populando as chaves dos respositórios.'
-    run_on_chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
+    _msg info 'Populando as chaves dos respositórios.'
+    _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
 
     # Rede
-    msg_info "Configurando o nome da maquina para: $HOST."
-    run_on_chroot "echo $HOST > /etc/hostname"
+    _msg info "Configurando o nome da maquina para: $HOST."
+    _chroot "echo $HOST > /etc/hostname"
 
-    msg_info 'Instalando e habilitando o NetworkManager.'
-    run_on_chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
-    run_on_chroot "systemctl enable NetworkManager" 2> /dev/null
+    _msg info 'Instalando e habilitando o NetworkManager.'
+    _chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
+    _chroot "systemctl enable NetworkManager" 2> /dev/null
 
     # Usuario
-    msg_info "Criando o usuário ${NEGRITO}$USER_NAME${SEMCOR}."
-    run_on_chroot "useradd -m -g users -G wheel -c \"$USER_NAME\" -s /bin/bash $USER"
+    _msg info "Criando o usuário ${NEGRITO}$USER_NAME${SEMCOR}."
+    _chroot "useradd -m -g users -G wheel -c \"$USER_NAME\" -s /bin/bash $MY_USER"
 
-    msg_info "Adicionando o usuario: ${NEGRITO}$USER_NAME${SEMCOR} ao grupo sudoers."
-    run_on_chroot "sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers"
+    _msg info "Adicionando o usuario: ${NEGRITO}$USER_NAME${SEMCOR} ao grupo sudoers."
+    _chroot "sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers"
 
-    msg_info "Definindo a senha do usuário ${NEGRITO}$USER_NAME${SEMCOR}."
-    run_on_chroot "echo ${USER}:${USER_PASSWD} | chpasswd"
+    _msg info "Definindo a senha do usuário ${NEGRITO}$USER_NAME${SEMCOR}."
+    _chroot "echo ${MY_USER}:${MY_USER} | chpasswd"
 
-    msg_info "Definindo a senha do usuário ${NEGRITO}Root${SEMCOR}."
-    run_on_chroot "echo root:${ROOT_PASSWD} | chpasswd"
+    _msg info "Definindo a senha do usuário ${NEGRITO}Root${SEMCOR}."
+    _chroot "echo root:${ROOT_PASSWD} | chpasswd"
 
     # Bootloader
-    msg_info 'Instalando o bootloader.'
-    run_on_chroot "bootctl install" 2> /dev/null
-    run_on_chroot "echo -e $LOADER_CONF > /boot/loader/loader.conf"
-    run_on_chroot "echo -e $ARCH_ENTRIE > /boot/loader/entries/arch.conf"
+    _msg info 'Instalando o bootloader.'
+    _chroot "bootctl install" 2> /dev/null
+    _chroot "echo -e \"$LOADER_CONF\" > /boot/loader/loader.conf"
+    _chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
 
     echo
-    msg_info 'Sistema instalado com sucesso!'
-    msg_info 'Retire a midia do computador e reincia a maquina!'
+    _msg info 'Sistema instalado com sucesso!'
+    _msg info 'Retire a midia do computador e reincie a maquina!'
 }
 
 # Chamada das Funções
 clear
+bem_vindo
 iniciar
 particionar_hd
 formatar_particao
