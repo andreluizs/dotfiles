@@ -227,8 +227,8 @@ function instalar_sistema() {
     local err=0
 
     echo
-    (pacstrap /mnt base base-devel &> /dev/null) & 
-    echo 'Instalando o sistema base.' spinner $! 
+    echo -n 'Instalando o sistema base.'
+    (pacstrap /mnt base base-devel &> /dev/null) & spinner $! 
 
     _msg info "Gerando o fstab."
     genfstab -p -L /mnt >> /mnt/etc/fstab
