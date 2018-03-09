@@ -30,7 +30,7 @@ readonly SEMCOR='\e[0m'
 # Usuário
 MY_USER=${MY_USER:-'andre'}
 MY_USER_NAME=${MY_USER_NAME:-'André Luiz'}
-MY_USER_PASSWD=${MY_USER:-'andre'}
+MY_USER_PASSWD=${MY_USER_PASSWD:-'andre'}
 ROOT_PASSWD=${ROOT_PASSWD:-'root'}
 
 # HD
@@ -62,8 +62,8 @@ ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.i
 function _msg() {
     case $1 in
     info)       cor="${VERDE}[I]${SEMCOR}" ;;
-    erro)       cor="${VERMELHO}[E]${SEMCOR}" ;;
-    quest)      cor="${AZUL}[Q]${SEMCOR}" ;;
+    erro)       cor="${VERMELHO}[X]${SEMCOR}" ;;
+    quest)      cor="${AZUL}[?]${SEMCOR}" ;;
     esac
     echo -e "${cor} ${2}"
 }
@@ -73,30 +73,37 @@ function _chroot() {
 }
 
 function bem_vindo() {
-    echo -e "${NEGRITO}=================================================${SEMCOR}"
-    echo -e "${NEGRITO}BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI${SEMCOR}"
-    echo -e "${NEGRITO}=================================================${SEMCOR}"
+    echo -e "${MAGENTA}"
+    echo -e "================================================="
+    echo -e "BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI"
+    echo -e "-------------------------------------------------"
+    echo -e "   André Luiz dos Santos (andreluizs@live.com)   "
+    echo -e "           Versão: 1.0b - Data: 03/2018          "
+    echo -e "-------------------------------------------------"
+    echo -e "   Esse instalador encontra-se em versão beta.   "
+    echo -e "   Usar esse instalador é por sua conta e risco. "
+    echo -e "   Não me responsabilizo pelos danos causados.   "
+    echo -e "================================================="
+    echo -e "${SEMCOR}"
     echo
 }
 
-function spinner() {
-    local pid=$1
-    local delay=0.75
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf "${AMARELO}[%c]${SEMCOR}  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
+function _spinner(){
+    local pid=$2
+    local i=1
+    readonly sp='/-\|'
+    echo -ne "$1 "
+    while [ -d /proc/"${pid}" ]; do
+        printf "${AMARELO}[%c]${SEMCOR}   " "${sp:i++%${#sp}:1}"
+        sleep 0.75
+        printf "\\b\\b\\b\\b\\b\\b"
     done
-    printf "    \b\b\b\b"
 }
 
 function iniciar() {
 
     padrao=${padrao:-s}
-    _msg quest "Gostaria de realizar a instalação padrão? (${NEGRITO}S/${SEMCOR}n):"
+    _msg quest "Gostaria de realizar a instalação padrão? (${NEGRITO}S${SEMCOR}/n):"
     read -s -en 1 padrao
 
     if [[ $padrao == "n" ]]; then
@@ -117,10 +124,10 @@ function iniciar() {
 
          _msg quest "Informe o nome da maquina:"
         read HOST
+    else
+        echo
+        echo -e "${AMARELO}Vá tomar um café, eu cuido do resto!${SEMCOR}"
     fi
-
-    echo
-    echo -e "${AMARELO}Vá buscar um café, eu cuido do resto!${SEMCOR}"
     
     echo
     _msg info 'Sincronizando a hora.'
@@ -149,20 +156,20 @@ function particionar_hd() {
 
     echo
     _msg info 'Definindo a tabela de partição para GPT.'
-    parted -s $HD mklabel gpt &> /dev/null
+    parted -s "$HD" mklabel gpt &> /dev/null
 
     _msg info "Criando a partição /boot com ${BOOT_SIZE}MB."
-    parted $HD mkpart ESP fat32 "${boot_start}MiB" "${boot_end}MiB" 2> /dev/null || err=1
-    parted $HD set 1 boot on 2> /dev/null || err=1
+    parted "$HD" mkpart ESP fat32 "${boot_start}MiB" "${boot_end}MiB" 2> /dev/null || err=1
+    parted "$HD" set 1 boot on 2> /dev/null || err=1
 
     _msg info "Criando a partição swap com ${SWAP_SIZE}MB."
-    parted $HD mkpart primary linux-swap "${swap_start}MiB" "${swap_end}MiB" 2> /dev/null || err=1
+    parted "$HD" mkpart primary linux-swap "${swap_start}MiB" "${swap_end}MiB" 2> /dev/null || err=1
 
     _msg info "Criando a partição /root com ${ROOT_SIZE}MB."
-    parted $HD mkpart primary ext4 "${root_start}MiB" "${root_end}MiB" 2> /dev/null || err=1
+    parted "$HD" mkpart primary ext4 "${root_start}MiB" "${root_end}MiB" 2> /dev/null || err=1
 
     _msg info 'Criando a partição /home com o restante do HD.'
-    parted $HD mkpart primary ext4 "${home_start}MiB" "$home_end" 2> /dev/null || err=1
+    parted "$HD" mkpart primary ext4 "${home_start}MiB" "$home_end" 2> /dev/null || err=1
 
     if [[ $err -eq 1 ]]; then
         _msg erro "Ocorreu um erro ao tentar particionar o HD."
@@ -213,7 +220,7 @@ function montar_particao() {
     mount "${HD}4" /mnt/home 1> /dev/null || err=1
 
     echo
-    echo -e "================= ${AZUL}TABELA${SEMCOR} ================="
+    echo -e "${AZUL}================= TABELA =================${SEMCOR}"
     lsblk "$HD"
 
     if [[ $err -eq 1 ]]; then
@@ -227,8 +234,9 @@ function instalar_sistema() {
     local err=0
 
     echo
-    echo -n 'Instalando o sistema base.'
-    (pacstrap /mnt base base-devel &> /dev/null) & spinner $! 
+    (pacstrap /mnt base base-devel &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o sistema base:" $! 
+    echo -ne "${VERDE}100%${SEMCOR}\\n"
 
     _msg info "Gerando o fstab."
     genfstab -p -L /mnt >> /mnt/etc/fstab
@@ -245,7 +253,7 @@ function configurar_sistema() {
     _msg info 'Entrando no novo sistema.'
 
     _msg info 'Configurando o teclado e o idioma para pt_BR.'
-    _chroot "echo -e KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP= > /etc/vconsole.conf"
+    _chroot "echo -e \"KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=\" > /etc/vconsole.conf"
     _chroot "sed -i '/pt_BR/,+1 s/^#//' /etc/locale.gen"
     _chroot "locale-gen" 1> /dev/null
     _chroot "echo LANG=pt_BR.UTF-8 > /etc/locale.conf"
@@ -259,7 +267,7 @@ function configurar_sistema() {
 
     # Multilib
     _msg info 'Habilitando o repositório multilib.'
-    _chroot "sed -i '/multilib\]/,+1  s/^#//' /etc/pacman.conf"
+    _chroot "sed -i '/multilib\\]/,+1  s/^#//' /etc/pacman.conf"
 
     _msg info 'Sincronizando repositório.'
     _chroot "pacman -Sy" 1> /dev/null
@@ -276,16 +284,16 @@ function configurar_sistema() {
     _chroot "systemctl enable NetworkManager" 2> /dev/null
 
     # Usuario
-    _msg info "Criando o usuário ${NEGRITO}$USER_NAME${SEMCOR}."
+    _msg info "Criando o usuário ${MAGENTA}$USER_NAME${SEMCOR}."
     _chroot "useradd -m -g users -G wheel -c \"$USER_NAME\" -s /bin/bash $MY_USER"
 
-    _msg info "Adicionando o usuario: ${NEGRITO}$USER_NAME${SEMCOR} ao grupo sudoers."
+    _msg info "Adicionando o usuario: ${MAGENTA}$USER_NAME${SEMCOR} ao grupo sudoers."
     _chroot "sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers"
 
-    _msg info "Definindo a senha do usuário ${NEGRITO}$USER_NAME${SEMCOR}."
-    _chroot "echo ${MY_USER}:${MY_USER} | chpasswd"
+    _msg info "Definindo a senha do usuário ${MAGENTA}$USER_NAME${SEMCOR}."
+    _chroot "echo ${MY_USER}:${MY_USER_PASSWD} | chpasswd"
 
-    _msg info "Definindo a senha do usuário ${NEGRITO}Root${SEMCOR}."
+    _msg info "Definindo a senha do usuário ${MAGENTA}Root${SEMCOR}."
     _chroot "echo root:${ROOT_PASSWD} | chpasswd"
 
     # Bootloader
