@@ -9,7 +9,7 @@
 #
 #        AUTHOR: André Luiz dos Santos (andreluizs@live.com),
 #       CREATED: 06/03/2018
-#      REVISION: 1.00
+#      REVISION: 1.0.0b
 #===============================================================================
 
 set -o errexit
@@ -61,11 +61,10 @@ ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.i
 
 function _msg() {
     case $1 in
-    info)       cor="${VERDE}[I]${SEMCOR}" ;;
-    erro)       cor="${VERMELHO}[X]${SEMCOR}" ;;
-    quest)      cor="${AZUL}[?]${SEMCOR}" ;;
+    info)       echo -e "${VERDE}[I]${SEMCOR} $2" ;;
+    erro)       echo -e "${VERMELHO}[X]${SEMCOR} $2" ;;
+    quest)      echo -ne "${AZUL}[?]${SEMCOR} $2" ;;
     esac
-    echo -e "${cor} ${2}"
 }
 
 function _chroot() {
@@ -73,28 +72,28 @@ function _chroot() {
 }
 
 function bem_vindo() {
-    echo -e "${MAGENTA}"
-    echo -e "================================================="
-    echo -e "BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI"
-    echo -e "-------------------------------------------------"
-    echo -e "   André Luiz dos Santos (andreluizs@live.com)   "
-    echo -e "           Versão: 1.0b - Data: 03/2018          "
-    echo -e "-------------------------------------------------"
-    echo -e "   Esse instalador encontra-se em versão beta.   "
-    echo -e "   Usar esse instalador é por sua conta e risco. "
-    echo -e "   Não me responsabilizo pelos danos causados.   "
-    echo -e "================================================="
-    echo -e "${SEMCOR}"
-    echo
+    echo -en "${NEGRITO}"
+    echo -e "============================================================================"
+    echo -e "              BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI             "
+    echo -e "----------------------------------------------------------------------------"
+    echo -e "                  André Luiz dos Santos (andreluizs@live.com)               "
+    echo -e "                         Versão: 1.0.0b - Data: 03/2018                     "
+    echo -en "----------------------------------------------------------------------------"
+    echo -en "${SEMCOR}                                                                  "
+    echo -e "${MAGENTA}                                                                 "
+    echo -e "                   Esse instalador encontra-se em versão beta.              "
+    echo -e "                  Usar esse instalador é por sua conta e risco.             "
+    echo -en "${SEMCOR}                                                                  "
 }
 
 function _spinner(){
     local pid=$2
     local i=1
+    local param=$1
     readonly sp='/-\|'
-    echo -ne "$1 "
+    echo -ne "$param "
     while [ -d /proc/"${pid}" ]; do
-        printf "${AMARELO}[%c]${SEMCOR}   " "${sp:i++%${#sp}:1}"
+        printf "${VERMELHO}[${SEMCOR}${AMARELO}%c${SEMCOR}${VERMELHO}]${SEMCOR}   " "${sp:i++%${#sp}:1}"
         sleep 0.75
         printf "\\b\\b\\b\\b\\b\\b"
     done
@@ -102,28 +101,45 @@ function _spinner(){
 
 function iniciar() {
 
-    padrao=${padrao:-s}
-    _msg quest "Gostaria de realizar a instalação padrão? (${NEGRITO}S${SEMCOR}/n):"
-    read -s -en 1 padrao
+    
+    
+    echo -e "${NEGRITO}"
+    echo -e "================================= DEFAULT =================================="
+    echo -e "Nome: ${MY_USER_NAME}"
+    echo -e "User: ${MY_USER}"
+    echo -e "Device: ${HD}"
+    echo -e "Maquina: ${HOST}"
+    echo -e "============================================================================"
+    echo -en "${SEMCOR}"
+
+    _msg quest "Gostaria de realizar a instalação com as configurações DEFAULT? (${NEGRITO}S${SEMCOR}/n):"
+    read -r -e -n 1 padrao
+    padrao=${padrao:=s}
 
     if [[ $padrao == "n" ]]; then
-        _msg quest 'Informe o nome completo do usuário:'
-        read MY_USER_NAME
+        _msg quest 'Informe o nome completo do usuário: '
+        read -re MY_USER_NAME
+        MY_USER_NAME=${MY_USER_NAME:='André Luiz'}
 
-        _msg quest 'Informe o úsuario:'
-        read MY_USER
+        _msg quest 'Informe o nick do úsuario: '
+        read -re MY_USER
+        MY_USER=${MY_USER:='andre'}
 
-        _msg quest "Informe o password do usuario: $MY_USER:"
-        read -s MY_USER
+        _msg quest "Informe o password para $MY_USER_NAME:\\n"
+        read -rs MY_USER_PASSWD
+        MY_USER_PASSWD=${MY_USER_PASSWD:='andre'}
 
-        _msg quest "Informe o password do usuario: root:"
-        read -s ROOT_PASSWD
+        _msg quest "Informe o password para Root:\\n"
+        read -rs ROOT_PASSWD
+        ROOT_PASSWD=${ROOT_PASSWD:='root'}
 
-        _msg quest "Informe o device que será instalado ex:[/dev/sda]:"
-        read HD
+        _msg quest "Informe o device em que o sistema será instalado (${HD}): "
+        read -re HD
+        HD=${HD:='/dev/sda'}
 
-         _msg quest "Informe o nome da maquina:"
-        read HOST
+         _msg quest "Informe o nome da maquina: "
+        read -re HOST
+        HOST=${HOST:='archlinux'}
     else
         echo
         echo -e "${AMARELO}Vá tomar um café, eu cuido do resto!${SEMCOR}"
@@ -155,7 +171,7 @@ function particionar_hd() {
     local home_end="100%"
 
     echo
-    _msg info 'Definindo a tabela de partição para GPT.'
+    _msg info "Definindo o device: ${HD} para GPT."
     parted -s "$HD" mklabel gpt &> /dev/null
 
     _msg info "Criando a partição /boot com ${BOOT_SIZE}MB."
@@ -236,7 +252,7 @@ function instalar_sistema() {
     echo
     (pacstrap /mnt base base-devel &> /dev/null) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o sistema base:" $! 
-    echo -ne "${VERDE}100%${SEMCOR}\\n"
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     _msg info "Gerando o fstab."
     genfstab -p -L /mnt >> /mnt/etc/fstab
@@ -280,17 +296,17 @@ function configurar_sistema() {
     _chroot "echo $HOST > /etc/hostname"
 
     _msg info 'Instalando e habilitando o NetworkManager.'
-    _chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
-    _chroot "systemctl enable NetworkManager" 2> /dev/null
+    #_chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
+    #_chroot "systemctl enable NetworkManager" 2> /dev/null
 
     # Usuario
-    _msg info "Criando o usuário ${MAGENTA}$USER_NAME${SEMCOR}."
-    _chroot "useradd -m -g users -G wheel -c \"$USER_NAME\" -s /bin/bash $MY_USER"
+    _msg info "Criando o usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
+    _chroot "useradd -m -g users -G wheel -c \"$MY_USER_NAME\" -s /bin/bash $MY_USER"
 
-    _msg info "Adicionando o usuario: ${MAGENTA}$USER_NAME${SEMCOR} ao grupo sudoers."
+    _msg info "Adicionando o usuario: ${MAGENTA}$MY_USER_NAME${SEMCOR} ao grupo sudoers."
     _chroot "sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers"
 
-    _msg info "Definindo a senha do usuário ${MAGENTA}$USER_NAME${SEMCOR}."
+    _msg info "Definindo a senha do usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
     _chroot "echo ${MY_USER}:${MY_USER_PASSWD} | chpasswd"
 
     _msg info "Definindo a senha do usuário ${MAGENTA}Root${SEMCOR}."
