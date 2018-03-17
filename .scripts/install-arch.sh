@@ -8,7 +8,7 @@
 #   DESCRIPTION: Script para realizar a instalação do Arch Linux.
 #
 #        AUTHOR: André Luiz dos Santos (andreluizs@live.com),
-#       CREATED: 06/03/2018
+#       CREATED: 03/2018
 #      REVISION: 1.0.0b
 #===============================================================================
 
@@ -292,19 +292,19 @@ function configurar_sistema() {
     _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
 
     # Rede
-    _msg info "Configurando o nome da maquina para: $HOST."
+    _msg info "Configurando o nome da maquina para: ${MAGENTA}$HOST${SEMCOR}."
     _chroot "echo $HOST > /etc/hostname"
 
     _msg info 'Instalando e habilitando o NetworkManager.'
-    #_chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
-    #_chroot "systemctl enable NetworkManager" 2> /dev/null
+    _chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
+    _chroot "systemctl enable NetworkManager" 2> /dev/null
 
     # Usuario
     _msg info "Criando o usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
     _chroot "useradd -m -g users -G wheel -c \"$MY_USER_NAME\" -s /bin/bash $MY_USER"
 
     _msg info "Adicionando o usuario: ${MAGENTA}$MY_USER_NAME${SEMCOR} ao grupo sudoers."
-    _chroot "sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers"
+    _chroot "sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^#//' /etc/sudoers"
 
     _msg info "Definindo a senha do usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
     _chroot "echo ${MY_USER}:${MY_USER_PASSWD} | chpasswd"
@@ -318,9 +318,42 @@ function configurar_sistema() {
     _chroot "echo -e \"$LOADER_CONF\" > /boot/loader/loader.conf"
     _chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
 
+    # Xorg
+    _msg info 'Instalando o Display Server X.org.'
+    _chroot 'pacman -S xorg-server xorg-xinit xorg-xprop xorg-xbacklight xorg-xdpyinfo xorg-xrandr --needed --noconfirm' &> /dev/null
+
+    # Drive de video
+    _msg info 'Instalando o Drive de Video (Virtual Box).'
+    _chroot 'pacman -S virtualbox-guest-utils --needed --noconfirm' 1> /dev/null
+    _chroot 'systemctl enable vboxservice.service' 2> /dev/null
+
+    # Drive de som
+    _msg info 'Instalando o Som.'
+    _chroot 'pacman -S alsa-utils --needed --noconfirm' 1> /dev/null
+
+    _msg info 'Instando o Window Manager (i3).'
+    _chroot 'pacman -S i3-gaps rofi --needed --noconfirm'
+
+    # AUR 
+    #_msg info 'Instalando o Trizen.'
+    #_chroot 'pacman -S git --needed --noconfirm'
+    #_chroot "su andre && \\
+                #cd ~ && \\ 
+                #git clone https://aur.archlinux.org/trizen.git && \\
+                #cd trizen && \\
+                #makepkg -si && \\
+                #cd -  && \\
+                #rm -Rf ~/trizen"
+
+    _msg info 'Instalando o Display Manager (lightdm).'
+    _chroot 'pacman -S lightdm lightdm-gtk-greeter --needed --noconfirm'
+    _chroot 'systemctl enable lightdm.service'
+
     echo
     _msg info 'Sistema instalado com sucesso!'
-    _msg info 'Retire a midia do computador e reincie a maquina!'
+    _msg info 'Reiniciando o computador'
+    umount -R /mnt 
+    sleep 3 && shutdown now -h
 }
 
 # Chamada das Funções
