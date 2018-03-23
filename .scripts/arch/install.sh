@@ -1,9 +1,9 @@
 #!/bin/bash
 #===============================================================================
 #
-#          FILE: install-arch.sh
+#          FILE: install.sh
 #
-#         USAGE: ./install-arch.sh
+#         USAGE: ./install.sh
 #
 #   DESCRIPTION: Script para realizar a instalação do Arch Linux.
 #
@@ -11,13 +11,13 @@
 #       CREATED: 03/2018
 #      REVISION: 1.0.0b
 #===============================================================================
-
 set -o errexit
 set -o pipefail
 
 #===============================================================================
 #---------------------------------VARIAVEIS-------------------------------------
 #===============================================================================
+
 # Cores
 readonly VERMELHO='\e[31m\e[1m'
 readonly VERDE='\e[32m\e[1m'
@@ -45,15 +45,15 @@ SWAP_SIZE=${SWAP_SIZE:-4096}
 ROOT_SIZE=${ROOT_SIZE:-30720}
 
 # Configurações da Região
-KEYBOARD_LAYOUT="br abnt2"
-LANGUAGE="pt_BR"
-TIMEZONE="America/Sao_Paulo"
-NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org
+readonly KEYBOARD_LAYOUT="br abnt2"
+readonly LANGUAGE="pt_BR"
+readonly TIMEZONE="America/Sao_Paulo"
+readonly NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org
 FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 # Entradas do Bootloader
-LOADER_CONF="timeout 0\\ndefault arch"
-ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
+readonly LOADER_CONF="timeout 0\\ndefault arch"
+readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -71,19 +71,8 @@ function _chroot() {
     arch-chroot /mnt /bin/bash -c "$1"
 }
 
-function bem_vindo() {
-    echo -en "${NEGRITO}"
-    echo -e "============================================================================"
-    echo -e "              BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI             "
-    echo -e "----------------------------------------------------------------------------"
-    echo -e "                  André Luiz dos Santos (andreluizs@live.com)               "
-    echo -e "                         Versão: 1.0.0b - Data: 03/2018                     "
-    echo -en "----------------------------------------------------------------------------"
-    echo -en "${SEMCOR}                                                                  "
-    echo -e "${MAGENTA}                                                                 "
-    echo -e "                   Esse instalador encontra-se em versão beta.              "
-    echo -e "                  Usar esse instalador é por sua conta e risco.             "
-    echo -en "${SEMCOR}                                                                  "
+function _chuser() {
+    arch-chroot -u "${MY_USER}" /mnt /bin/bash -c "$1"
 }
 
 function _spinner(){
@@ -99,16 +88,60 @@ function _spinner(){
     done
 }
 
+function _ler_info_usuario(){
+    _msg quest 'Informe o nome completo do usuário: '
+    read -re MY_USER_NAME
+    MY_USER_NAME=${MY_USER_NAME:='André Luiz'}
+
+    _msg quest 'Informe o nick do úsuario: '
+    read -re MY_USER
+    MY_USER=${MY_USER:='andre'}
+
+    _msg quest "Informe o password para $MY_USER_NAME:\\n"
+    read -rs MY_USER_PASSWD
+    MY_USER_PASSWD=${MY_USER_PASSWD:='andre'}
+
+    _msg quest "Informe o password para Root:\\n"
+    read -rs ROOT_PASSWD
+    ROOT_PASSWD=${ROOT_PASSWD:='root'}
+
+    _msg quest "Informe o device em que o sistema será instalado (${HD}): "
+    read -re HD
+    HD=${HD:='/dev/sda'}
+
+    _msg quest "Informe o nome da maquina: "
+    read -re HOST
+    HOST=${HOST:='archlinux'}
+}
+
+
+
+function bem_vindo() {
+    echo -en "${NEGRITO}"
+    echo -e "============================================================================"
+    echo -e "              BEM VINDO AO INSTALADOR AUTOMÁTICO DO ARCH - UEFI             "
+    echo -e "----------------------------------------------------------------------------"
+    echo -e "                  André Luiz dos Santos (andreluizs@live.com)               "
+    echo -e "                         Versão: 1.0.0b - Data: 03/2018                     "
+    echo -en "----------------------------------------------------------------------------"
+    echo -en "${SEMCOR}                                                                  "
+    echo -e "${MAGENTA}                                                                 "
+    echo -e "                   Esse instalador encontra-se em versão beta.              "
+    echo -e "                  Usar esse instalador é por sua conta e risco.             "
+    echo -en "${SEMCOR}                                                                  "
+}
+
 function iniciar() {
 
-    
-    
     echo -e "${NEGRITO}"
     echo -e "================================= DEFAULT =================================="
     echo -e "Nome: ${MY_USER_NAME}"
     echo -e "User: ${MY_USER}"
     echo -e "Device: ${HD}"
     echo -e "Maquina: ${HOST}"
+    echo -e "/boot: ${BOOT_SIZE}MB"
+    echo -e "/root: ${ROOT_SIZE}MB"
+    echo -e "/home: Restante do HD"
     echo -e "============================================================================"
     echo -en "${SEMCOR}"
 
@@ -117,29 +150,7 @@ function iniciar() {
     padrao=${padrao:=s}
 
     if [[ $padrao == "n" ]]; then
-        _msg quest 'Informe o nome completo do usuário: '
-        read -re MY_USER_NAME
-        MY_USER_NAME=${MY_USER_NAME:='André Luiz'}
-
-        _msg quest 'Informe o nick do úsuario: '
-        read -re MY_USER
-        MY_USER=${MY_USER:='andre'}
-
-        _msg quest "Informe o password para $MY_USER_NAME:\\n"
-        read -rs MY_USER_PASSWD
-        MY_USER_PASSWD=${MY_USER_PASSWD:='andre'}
-
-        _msg quest "Informe o password para Root:\\n"
-        read -rs ROOT_PASSWD
-        ROOT_PASSWD=${ROOT_PASSWD:='root'}
-
-        _msg quest "Informe o device em que o sistema será instalado (${HD}): "
-        read -re HD
-        HD=${HD:='/dev/sda'}
-
-         _msg quest "Informe o nome da maquina: "
-        read -re HOST
-        HOST=${HOST:='archlinux'}
+        _ler_info_usuario
     else
         echo
         echo -e "${AMARELO}Vá tomar um café, eu cuido do resto!${SEMCOR}"
@@ -151,10 +162,11 @@ function iniciar() {
 
     _msg info "Definindo o teclado para: $KEYBOARD_LAYOUT."
     localectl set-x11-keymap "$KEYBOARD_LAYOUT"
-
-    _msg info 'Procurando o servidor mais rápido.'
-    sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist >/etc/pacman.d/mirrorlist.backup
-    rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup >/etc/pacman.d/mirrorlist
+    
+    # ARRUMAR
+    # _msg info 'Procurando o servidor mais rápido.'
+    # sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist >/etc/pacman.d/mirrorlist.backup
+    # rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup >/etc/pacman.d/mirrorlist
 }
 
 function particionar_hd() {
@@ -202,7 +214,7 @@ function formatar_particao() {
     mkfs.vfat -F32 "${HD}1" -n BOOT 1> /dev/null || err=1
 
     _msg info 'Formatando a partição swap.'
-    mkswap "${HD}2" 1> /dev/null || err=1
+    mkswap "${HD}2" -L SWAP 1> /dev/null || err=1
 
     _msg info 'Formatando a partição /root.'
     mkfs.ext4 "${HD}3" -L ROOT &> /dev/null || err=1
@@ -264,10 +276,7 @@ function instalar_sistema() {
 }
 
 function configurar_sistema() {
-
-    echo
     _msg info 'Entrando no novo sistema.'
-
     _msg info 'Configurando o teclado e o idioma para pt_BR.'
     _chroot "echo -e \"KEYMAP=br-abnt2\\nFONT=Lat2-Terminus16\\nFONT_MAP=\" > /etc/vconsole.conf"
     _chroot "sed -i '/pt_BR/,+1 s/^#//' /etc/locale.gen"
@@ -293,10 +302,10 @@ function configurar_sistema() {
 
     # Rede
     _msg info "Configurando o nome da maquina para: ${MAGENTA}$HOST${SEMCOR}."
-    _chroot "echo $HOST > /etc/hostname"
+    _chroot "echo \"$HOST\" > /etc/hostname"
 
     _msg info 'Instalando e habilitando o NetworkManager.'
-    _chroot 'pacman -S networkmanager --needed --noconfirm' 1> /dev/null
+    _chroot "pacman -S networkmanager --needed --noconfirm" 1> /dev/null
     _chroot "systemctl enable NetworkManager" 2> /dev/null
 
     # Usuario
@@ -320,40 +329,38 @@ function configurar_sistema() {
 
     # Xorg
     _msg info 'Instalando o Display Server X.org.'
-    _chroot 'pacman -S xorg-server xorg-xinit xorg-xprop xorg-xbacklight xorg-xdpyinfo xorg-xrandr --needed --noconfirm' &> /dev/null
+    _chroot "pacman -S xorg-server xorg-xinit xorg-xprop xorg-xbacklight xorg-xdpyinfo xorg-xrandr --needed --noconfirm" &> /dev/null
 
     # Drive de video
     _msg info 'Instalando o Drive de Video (Virtual Box).'
-    _chroot 'pacman -S virtualbox-guest-utils --needed --noconfirm' 1> /dev/null
-    _chroot 'systemctl enable vboxservice.service' 2> /dev/null
+    _chroot "pacman -S virtualbox-guest-utils --needed --noconfirm" 1> /dev/null
+    _chroot "systemctl enable vboxservice.service" 2> /dev/null
 
     # Drive de som
     _msg info 'Instalando o Som.'
-    _chroot 'pacman -S alsa-utils --needed --noconfirm' 1> /dev/null
+    _chroot "pacman -S alsa-utils --needed --noconfirm" 1> /dev/null
 
     _msg info 'Instando o Window Manager (i3).'
-    _chroot 'pacman -S i3-gaps rofi --needed --noconfirm'
+    _chroot "pacman -S i3-gaps rofi --needed --noconfirm" 1> /dev/null
 
     # AUR 
-    #_msg info 'Instalando o Trizen.'
-    #_chroot 'pacman -S git --needed --noconfirm'
-    #_chroot "su andre && \\
-                #cd ~ && \\ 
-                #git clone https://aur.archlinux.org/trizen.git && \\
-                #cd trizen && \\
-                #makepkg -si && \\
-                #cd -  && \\
-                #rm -Rf ~/trizen"
+    _msg info 'Instalando o Trizen.'
+    _chroot "pacman -S git --needed --noconfirm && 
+             cd /home/${MY_USER} && su ${MY_USER} -c \"git clone https://aur.archlinux.org/trizen.git\" && 
+             cd /home/${MY_USER}/trizen && su ${MY_USER} -c \"makepkg -si --noconfirm\" && 
+             rm -Rf /home/${MY_USER}/trizen"
+
+    _msg info 'Instalando a Polybar.'
+    _chroot "su ${MY_USER} -c \"trizen -S polybar --noconfirm\""
 
     _msg info 'Instalando o Display Manager (lightdm).'
-    _chroot 'pacman -S lightdm lightdm-gtk-greeter --needed --noconfirm'
-    _chroot 'systemctl enable lightdm.service'
-
-    echo
+    _chroot "pacman -S lightdm --needed --noconfirm"
+    _chroot "systemctl enable lightdm.service"
     _msg info 'Sistema instalado com sucesso!'
     _msg info 'Reiniciando o computador'
-    umount -R /mnt 
-    sleep 3 && shutdown now -h
+    # umount -R /mnt
+    # swpoff -L SWAP
+    # sleep 3 && reboot
 }
 
 # Chamada das Funções
