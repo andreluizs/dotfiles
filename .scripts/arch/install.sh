@@ -42,7 +42,7 @@ HOST=${HOST:-"archlinux"}
 # Tamanho das partições em MB
 BOOT_SIZE=${BOOT_SIZE:-512}
 SWAP_SIZE=${SWAP_SIZE:-4096}
-ROOT_SIZE=${ROOT_SIZE:-30720}
+ROOT_SIZE=${ROOT_SIZE:-51200}
 
 # Configurações da Região
 readonly KEYBOARD_LAYOUT="br abnt2"
@@ -53,7 +53,10 @@ FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 # Entradas do Bootloader
 readonly LOADER_CONF="timeout 0\\ndefault arch"
-readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}3 rw"
+readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}2 rw"
+
+# Pacotes extras
+readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs network-manager-applet"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -72,14 +75,14 @@ function _chroot() {
 }
 
 function _chuser() {
-    arch-chroot -u "${MY_USER}" /mnt /bin/bash -c "$1"
+    _chroot "su ${MY_USER} -c \"$1\""
 }
 
 function _spinner(){
     local pid=$2
     local i=1
     local param=$1
-    readonly sp='/-\|'
+    local sp='/-\|'
     echo -ne "$param "
     while [ -d /proc/"${pid}" ]; do
         printf "${VERMELHO}[${SEMCOR}${AMARELO}%c${SEMCOR}${VERMELHO}]${SEMCOR}   " "${sp:i++%${#sp}:1}"
@@ -123,40 +126,33 @@ function bem_vindo() {
     echo -e "----------------------------------------------------------------------------"
     echo -e "                  André Luiz dos Santos (andreluizs@live.com)               "
     echo -e "                         Versão: 1.0.0b - Data: 03/2018                     "
-    echo -en "----------------------------------------------------------------------------"
-    echo -en "${SEMCOR}                                                                  "
-    echo -e "${MAGENTA}                                                                 "
-    echo -e "                   Esse instalador encontra-se em versão beta.              "
-    echo -e "                  Usar esse instalador é por sua conta e risco.             "
-    echo -en "${SEMCOR}                                                                  "
+    echo -e "----------------------------------------------------------------------------${SEMCOR}${MAGENTA}"
+    echo -e "                  Esse instalador encontra-se em versão beta.              "
+    echo -en "                 Usar esse instalador é por sua conta e risco.${SEMCOR}    "
 }
 
 function iniciar() {
 
     echo -e "${NEGRITO}"
     echo -e "================================= DEFAULT =================================="
-    echo -e "Nome: ${MY_USER_NAME}"
-    echo -e "User: ${MY_USER}"
-    echo -e "Device: ${HD}"
-    echo -e "Maquina: ${HOST}"
-    echo -e "/boot: ${BOOT_SIZE}MB"
-    echo -e "/root: ${ROOT_SIZE}MB"
-    echo -e "/home: Restante do HD"
+    echo -e "Nome: ${MAGENTA}${MY_USER_NAME}${SEMCOR}            User: ${MAGENTA}${MY_USER}${SEMCOR}            Maquina: ${MAGENTA}${HOST}${SEMCOR}       "
+    echo -e "Device: ${MAGENTA}${HD}${SEMCOR}   /boot: ${MAGENTA}${BOOT_SIZE}MB${SEMCOR}    /root: ${MAGENTA}${ROOT_SIZE}MB${SEMCOR}    /home: ${MAGENTA}restante do HD${SEMCOR}"
     echo -e "============================================================================"
     echo -en "${SEMCOR}"
-
-    _msg quest "Gostaria de realizar a instalação com as configurações DEFAULT? (${NEGRITO}S${SEMCOR}/n):"
-    read -r -e -n 1 padrao
-    padrao=${padrao:=s}
-
-    if [[ $padrao == "n" ]]; then
-        _ler_info_usuario
-    else
-        echo
-        echo -e "${AMARELO}Vá tomar um café, eu cuido do resto!${SEMCOR}"
-    fi
-    
     echo
+
+    #_msg quest "Gostaria de realizar a instalação com as configurações DEFAULT? (${NEGRITO}S${SEMCOR}/n):"
+    #read -r -e -n 1 padrao
+    #padrao=${padrao:=s}
+
+    #if [[ $padrao == "n" ]]; then
+    #    _ler_info_usuario
+    #else
+    #    echo
+        echo -e "${AMARELO}Vá tomar um café, eu cuido do resto!${SEMCOR}"
+    #fi
+    
+    #echo
     _msg info 'Sincronizando a hora.'
     timedatectl set-ntp true
 
@@ -175,28 +171,22 @@ function particionar_hd() {
     # Calculo para criar as partições com o parted
     local boot_start=1
     local boot_end=$((BOOT_SIZE + boot_start))
-    local swap_start=$boot_end
-    local swap_end=$((swap_start + SWAP_SIZE))
-    local root_start=$swap_end
+    local root_start=$boot_end
     local root_end=$((root_start + ROOT_SIZE))
     local home_start=$root_end
     local home_end="100%"
 
-    echo
     _msg info "Definindo o device: ${HD} para GPT."
     parted -s "$HD" mklabel gpt &> /dev/null
 
-    _msg info "Criando a partição /boot com ${BOOT_SIZE}MB."
+    _msg info "Criando a partição /boot com ${MAGENTA}${BOOT_SIZE}MB${SEMCOR}."
     parted "$HD" mkpart ESP fat32 "${boot_start}MiB" "${boot_end}MiB" 2> /dev/null || err=1
     parted "$HD" set 1 boot on 2> /dev/null || err=1
 
-    _msg info "Criando a partição swap com ${SWAP_SIZE}MB."
-    parted "$HD" mkpart primary linux-swap "${swap_start}MiB" "${swap_end}MiB" 2> /dev/null || err=1
-
-    _msg info "Criando a partição /root com ${ROOT_SIZE}MB."
+    _msg info "Criando a partição /root com ${MAGENTA}${ROOT_SIZE}MB${SEMCOR}."
     parted "$HD" mkpart primary ext4 "${root_start}MiB" "${root_end}MiB" 2> /dev/null || err=1
 
-    _msg info 'Criando a partição /home com o restante do HD.'
+    _msg info "Criando a partição /home com o ${MAGENTA}restante do HD${SEMCOR}."
     parted "$HD" mkpart primary ext4 "${home_start}MiB" "$home_end" 2> /dev/null || err=1
 
     if [[ $err -eq 1 ]]; then
@@ -209,18 +199,14 @@ function particionar_hd() {
 function formatar_particao() {
     local err=0
 
-    echo
     _msg info 'Formatando a partição /boot.'
     mkfs.vfat -F32 "${HD}1" -n BOOT 1> /dev/null || err=1
 
-    _msg info 'Formatando a partição swap.'
-    mkswap "${HD}2" -L SWAP 1> /dev/null || err=1
-
     _msg info 'Formatando a partição /root.'
-    mkfs.ext4 "${HD}3" -L ROOT &> /dev/null || err=1
+    mkfs.ext4 "${HD}2" -L ROOT &> /dev/null || err=1
 
     _msg info 'Formatando a partição /home.'
-    mkfs.ext4 "${HD}4" -L HOME &> /dev/null || err=1
+    mkfs.ext4 "${HD}3" -L HOME &> /dev/null || err=1
 
     if [[ $err -eq 1 ]]; then
         _msg erro "Ocorreu um erro ao tentar formatar as partições."
@@ -232,12 +218,8 @@ function formatar_particao() {
 function montar_particao() {
     local err=0
 
-    echo
-    _msg info 'Montando a partição swap.'
-    swapon "${HD}2" 1> /dev/null || err=1
-
     _msg info 'Montando a partição /root.'
-    mount "${HD}3" /mnt 1> /dev/null || err=1
+    mount "${HD}2" /mnt 1> /dev/null || err=1
 
     _msg info 'Montando a partição /boot.'
     mkdir -p /mnt/boot
@@ -245,7 +227,7 @@ function montar_particao() {
 
     _msg info 'Montando a partição /home.'
     mkdir /mnt/home
-    mount "${HD}4" /mnt/home 1> /dev/null || err=1
+    mount "${HD}3" /mnt/home 1> /dev/null || err=1
 
     echo
     echo -e "${AZUL}================= TABELA =================${SEMCOR}"
@@ -284,6 +266,13 @@ function configurar_sistema() {
     _chroot "echo LANG=pt_BR.UTF-8 > /etc/locale.conf"
     _chroot "export LANG=pt_BR.UTF-8"
 
+    # Swapfile
+    _msg info "Criando o swapfile com ${SWAP_SIZE}MB."
+    _chroot "fallocate -l \"${SWAP_SIZE}M\" /swapfile" 1> /dev/null
+    _chroot "chmod 600 /swapfile" 1> /dev/null
+    _chroot "mkswap /swapfile" 1> /dev/null
+    _chroot "swapon /swapfile" 1> /dev/null
+
     # Hora
     _msg info "Configurando o horário para a região ${TIMEZONE}."
     _chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
@@ -312,7 +301,7 @@ function configurar_sistema() {
     _msg info "Criando o usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
     _chroot "useradd -m -g users -G wheel -c \"$MY_USER_NAME\" -s /bin/bash $MY_USER"
 
-    _msg info "Adicionando o usuario: ${MAGENTA}$MY_USER_NAME${SEMCOR} ao grupo sudoers."
+    _msg info "Adicionando o usuario: ${MAGENTA}$MY_USER${SEMCOR} ao grupo sudoers."
     _chroot "sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^#//' /etc/sudoers"
 
     _msg info "Definindo a senha do usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
@@ -323,41 +312,50 @@ function configurar_sistema() {
 
     # Bootloader
     _msg info 'Instalando o bootloader.'
-    _chroot "bootctl install" 2> /dev/null
-    _chroot "echo -e \"$LOADER_CONF\" > /boot/loader/loader.conf"
-    _chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
+    #_chroot "bootctl install" 2> /dev/null
+    #_chroot "echo -e \"$LOADER_CONF\" > /boot/loader/loader.conf"
+    #_chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
+    _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
+    _chroot "refind-install" 1> /dev/null
 
     # Xorg
-    _msg info 'Instalando o Display Server X.org.'
+    _msg info 'Instalando o Display Server (X.org).'
     _chroot "pacman -S xorg-server xorg-xinit xorg-xprop xorg-xbacklight xorg-xdpyinfo xorg-xrandr --needed --noconfirm" &> /dev/null
-
+    
     # Drive de video
-    _msg info 'Instalando o Drive de Video (Virtual Box).'
-    _chroot "pacman -S virtualbox-guest-utils --needed --noconfirm" 1> /dev/null
-    _chroot "systemctl enable vboxservice.service" 2> /dev/null
+    _msg info 'Instalando o Drive de Video (Intel).'
+    _chroot "pacman -S intel-ucode mesa xf86-video-intel lib32-mesa vulkan-intel --needed --noconfirm" &> /dev/null
+    #_chroot "pacman -S virtualbox-guest-utils virtualbox-guest-modules-arch --needed --noconfirm" 1> /dev/null
+    #_chroot "systemctl enable vboxservice.service" &> /dev/null
+    
+    # DE
+    (_chroot "pacman -S gnome gnome-extra --needed --noconfirm" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o Desktop Environment (Gnome):" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+
+    # Display Manager
+    _msg info 'Instalando o Display Manager (GDM).'
+    _chroot "pacman -S gdm --needed --noconfirm" &> /dev/null
+    _chroot "systemctl enable gdm.service" &> /dev/null
 
     # Drive de som
-    _msg info 'Instalando o Som.'
-    _chroot "pacman -S alsa-utils --needed --noconfirm" 1> /dev/null
-
-    _msg info 'Instando o Window Manager (i3).'
-    _chroot "pacman -S i3-gaps rofi --needed --noconfirm" 1> /dev/null
+    _msg info 'Instalando o Som (alsa / pulseaudio).'
+    _chroot "pacman -S alsa-utils pulseaudio --needed --noconfirm" &> /dev/null
 
     # AUR 
-    _msg info 'Instalando o Trizen.'
-    _chroot "pacman -S git --needed --noconfirm && 
-             cd /home/${MY_USER} && su ${MY_USER} -c \"git clone https://aur.archlinux.org/trizen.git\" && 
-             cd /home/${MY_USER}/trizen && su ${MY_USER} -c \"makepkg -si --noconfirm\" && 
-             rm -Rf /home/${MY_USER}/trizen"
+    _msg info 'Instalando o gerenciador de pacotes do AUR (Trizen).'
+    _chroot "pacman -S git --needed --noconfirm" 
+    _chuser "cd /home/${MY_USER} && git clone https://aur.archlinux.org/trizen.git && 
+             cd /home/${MY_USER}/trizen && makepkg -si --noconfirm && 
+             rm -Rf /home/${MY_USER}/trizen" &> /dev/null
 
-    _msg info 'Instalando a Polybar.'
-    _chroot "su ${MY_USER} -c \"trizen -S polybar --noconfirm\""
-
-    _msg info 'Instalando o Display Manager (lightdm).'
-    _chroot "pacman -S lightdm --needed --noconfirm"
-    _chroot "systemctl enable lightdm.service"
+    _msg info "Instalando pacotes extras"
+    _chuser "trizen -S ${PKG_EXTRA} --needed --noconfirm" &> /dev/null
+    _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update" &> /dev/null
+    
     _msg info 'Sistema instalado com sucesso!'
-    _msg info 'Reiniciando o computador'
+    _msg info 'Reinicie o computador'
+    
     # umount -R /mnt
     # swpoff -L SWAP
     # sleep 3 && reboot
