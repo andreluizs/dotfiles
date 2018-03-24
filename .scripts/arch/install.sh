@@ -222,8 +222,8 @@ function montar_particao() {
     mount "${HD}2" /mnt 1> /dev/null || err=1
 
     _msg info 'Montando a partição /boot.'
-    mkdir -p /mnt/boot
-    mount "${HD}1" /mnt/boot 1> /dev/null || err=1
+    mkdir -p /mnt/boot/efi
+    mount "${HD}1" /mnt/boot/efi 1> /dev/null || err=1
 
     _msg info 'Montando a partição /home.'
     mkdir /mnt/home
@@ -344,7 +344,7 @@ function configurar_sistema() {
 
     # AUR 
     _msg info 'Instalando o gerenciador de pacotes do AUR (Trizen).'
-    _chroot "pacman -S git --needed --noconfirm" 
+    _chroot "pacman -S git --needed --noconfirm" &> /dev/null
     _chuser "cd /home/${MY_USER} && git clone https://aur.archlinux.org/trizen.git && 
              cd /home/${MY_USER}/trizen && makepkg -si --noconfirm && 
              rm -Rf /home/${MY_USER}/trizen" &> /dev/null
@@ -356,7 +356,7 @@ function configurar_sistema() {
     _msg info 'Sistema instalado com sucesso!'
     _msg info 'Reinicie o computador'
     
-    # umount -R /mnt
+    umount -R /mnt
     # swpoff -L SWAP
     # sleep 3 && reboot
 }
