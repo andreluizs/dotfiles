@@ -56,7 +56,7 @@ readonly LOADER_CONF="timeout 0\\ndefault arch"
 readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}2 rw"
 
 # Pacotes extras
-readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs network-manager-applet google-chrome spotify playerctl"
+readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs network-manager-applet google-chrome spotify playerctl visual-studio-code-bin telegram-desktop"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -318,8 +318,8 @@ function configurar_sistema() {
     #_chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
-    _chroot "mkrlconfig"
-    _chroot "echo -e \"Boot with minimal options\"   \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf
+    _chroot "mkrlconf"
+    _chroot "echo -e \"Boot com as opções minimas\"   \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf
     # Tempo de espera do boot
     #timeout 10
 
