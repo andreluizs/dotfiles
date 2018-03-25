@@ -160,7 +160,9 @@ function iniciar() {
     localectl set-x11-keymap "$KEYBOARD_LAYOUT"
     
     # ARRUMAR
-    # _msg info 'Procurando o servidor mais rápido.'
+    _msg info 'Procurando o servidor mais rápido.'
+    pacman -Sy reflector --needed --noconfirm &> /dev/null
+    reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist 1> /dev/null
     # sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist >/etc/pacman.d/mirrorlist.backup
     # rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup >/etc/pacman.d/mirrorlist
 }
@@ -283,9 +285,10 @@ function configurar_sistema() {
     # Multilib
     _msg info 'Habilitando o repositório multilib.'
     _chroot "sed -i '/multilib\\]/,+1  s/^#//' /etc/pacman.conf"
-
-    _msg info 'Sincronizando repositório.'
-    _chroot "pacman -Sy" 1> /dev/null
+    
+    _msg info 'Adicionando o servidor mais rápido.'
+     _chroot "pacman -Sy reflector --needed --noconfirm" &> /dev/null
+     _chroot "reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist" 1> /dev/null
 
     _msg info 'Populando as chaves dos respositórios.'
     _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
@@ -319,7 +322,7 @@ function configurar_sistema() {
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
     _chroot "mkrlconf"
-    _chroot "echo -e \"Boot com as opcoes minimas\" \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf"
+    _chroot "echo -e \"Boot com as opcoes minimas\" \"ro root=${HD}2\" > /boot/refind_linux.conf"
     # Tempo de espera do boot
     #timeout 10
 
@@ -375,18 +378,18 @@ function configurar_sistema() {
     _chuser "trizen -S ${PKG_EXTRA} --needed --noconfirm" &> /dev/null
     _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update" &> /dev/null
     
-     _msg info 'Sincronizando a hora.'
-    _chuser "timedatectl set-ntp true"
+    #_msg info 'Sincronizando a hora.'
+    #_chuser "timedatectl set-ntp true"
 
-    _msg info "Definindo o teclado para: $KEYBOARD_LAYOUT."
-    _chuser "localectl set-x11-keymap \"$KEYBOARD_LAYOUT\""
+    #_msg info "Definindo o teclado para: $KEYBOARD_LAYOUT."
+    #_chuser "localectl set-x11-keymap \"$KEYBOARD_LAYOUT\""
     
     _msg info 'Sistema instalado com sucesso!'
-    _msg info 'Reinicie o computador'
+    _msg info 'Reiniciando o computador'
     
-    umount -R /mnt
+    sleep 3 && umount -R /mnt
     # swpoff -L SWAP
-    # sleep 3 && reboot
+    reboot
 }
 
 # Chamada das Funções
