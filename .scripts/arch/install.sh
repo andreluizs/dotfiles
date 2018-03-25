@@ -56,7 +56,7 @@ readonly LOADER_CONF="timeout 0\\ndefault arch"
 readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}2 rw"
 
 # Pacotes extras
-readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs network-manager-applet"
+readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs network-manager-applet google-chrome spotify playerctl"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -272,6 +272,7 @@ function configurar_sistema() {
     _chroot "chmod 600 /swapfile" 1> /dev/null
     _chroot "mkswap /swapfile" 1> /dev/null
     _chroot "swapon /swapfile" 1> /dev/null
+    _chroot "echo -e /swapfile none swap defaults 0 0 >> /etc/fstab"
 
     # Hora
     _msg info "Configurando o horário para a região ${TIMEZONE}."
@@ -316,7 +317,28 @@ function configurar_sistema() {
     #_chroot "echo -e \"$LOADER_CONF\" > /boot/loader/loader.conf"
     #_chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
-    _chroot "refind-install" 1> /dev/null
+    _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
+    _chroot "mkrlconfig"
+    _chroot "echo -e \"Boot with minimal options\"   \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf
+    # Tempo de espera do boot
+    #timeout 10
+
+    # Menu Arch Linux
+    # menuentry "Arch Linux" {
+    # icon     /EFI/refind/icons/os_arch.png
+    # volume   "Arch Linux"
+    # loader   /boot/vmlinuz-linux
+    # initrd   /boot/initramfs-linux.img
+    # options  "root=/dev/sda2 rw add_efi_memmap"
+    # submenuentry "Boot using fallback initramfs" {
+        #initrd /boot/initramfs-linux-fallback.img
+    #}
+    # submenuentry "Boot to terminal" {
+        # add_options "systemd.unit=multi-user.target"
+    #}
+    #disabled
+    #}
+
 
     # Xorg
     _msg info 'Instalando o Display Server (X.org).'
@@ -329,7 +351,7 @@ function configurar_sistema() {
     #_chroot "systemctl enable vboxservice.service" &> /dev/null
     
     # DE
-    (_chroot "pacman -S gnome gnome-extra --needed --noconfirm" &> /dev/null) &
+    (_chroot "pacman -S gnome --needed --noconfirm" &> /dev/null) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o Desktop Environment (Gnome):" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
