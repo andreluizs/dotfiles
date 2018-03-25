@@ -277,7 +277,7 @@ function configurar_sistema() {
     # Hora
     _msg info "Configurando o horário para a região ${TIMEZONE}."
     _chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
-    _chroot "hwclock -w -u"
+    _chroot "hwclock --systohc --utc"
     _chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
 
     # Multilib
@@ -319,7 +319,7 @@ function configurar_sistema() {
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
     _chroot "mkrlconf"
-    _chroot "echo -e \"Boot com as opções minimas\"   \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf"
+    _chroot "echo -e \""Boot com as opcoes minimas\""   \""ro root=\"${HD}2\"\"" > /boot/refind_linux.conf"
     # Tempo de espera do boot
     #timeout 10
 
@@ -351,14 +351,14 @@ function configurar_sistema() {
     #_chroot "systemctl enable vboxservice.service" &> /dev/null
     
     # DE
-    (_chroot "pacman -S gnome --needed --noconfirm" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o Desktop Environment (Gnome):" $! 
+    (_chroot "pacman -S mate --needed --noconfirm" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o Desktop Environment (MATE):" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     # Display Manager
-    _msg info 'Instalando o Display Manager (GDM).'
-    _chroot "pacman -S gdm --needed --noconfirm" &> /dev/null
-    _chroot "systemctl enable gdm.service" &> /dev/null
+    _msg info 'Instalando o Display Manager (LightDM).'
+    _chroot "pacman -S lightdm --needed --noconfirm" &> /dev/null
+    _chroot "systemctl enable lightdm.service" &> /dev/null
 
     # Drive de som
     _msg info 'Instalando o Som (alsa / pulseaudio).'
@@ -374,6 +374,12 @@ function configurar_sistema() {
     _msg info "Instalando pacotes extras"
     _chuser "trizen -S ${PKG_EXTRA} --needed --noconfirm" &> /dev/null
     _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update" &> /dev/null
+    
+     _msg info 'Sincronizando a hora.'
+    _chuser "timedatectl set-ntp true"
+
+    _msg info "Definindo o teclado para: $KEYBOARD_LAYOUT."
+    _chuser "localectl set-x11-keymap \"$KEYBOARD_LAYOUT\""
     
     _msg info 'Sistema instalado com sucesso!'
     _msg info 'Reinicie o computador'
