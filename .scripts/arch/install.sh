@@ -319,7 +319,7 @@ function configurar_sistema() {
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
     _chroot "mkrlconf"
-    _chroot "echo -e \"Boot com as opções minimas\"   \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf
+    _chroot "echo -e \"Boot com as opções minimas\"   \"ro root=\"${HD}2\"\" > /boot/refind_linux.conf"
     # Tempo de espera do boot
     #timeout 10
 
