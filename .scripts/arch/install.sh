@@ -52,11 +52,14 @@ readonly NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.a
 FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 # Entradas do Bootloader
-readonly LOADER_CONF="timeout 0\\ndefault arch"
-readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}2 rw"
+#readonly LOADER_CONF="timeout 0\\ndefault arch"
+#readonly ARCH_ENTRIE="title Arch Linux\\nlinux /vmlinuz-linux\\ninitrd /initramfs-linux.img\\noptions root=${HD}2 rw"
+readonly ARCH_ENTRIE="'"Default Boot"' \"rw root=${HD}2\""
 
 # Pacotes extras
-readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs network-manager-applet google-chrome spotify playerctl visual-studio-code-bin telegram-desktop"
+readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs 
+network-manager-applet google-chrome spotify playerctl visual-studio-code-bin 
+telegram-desktop"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -322,7 +325,7 @@ function configurar_sistema() {
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
     _chroot "mkrlconf"
-    _chroot "echo -e \"Boot com as opcoes minimas\" \"ro root=${HD}2\" > /boot/refind_linux.conf"
+    _chroot "echo -e ${ARCH_ENTRIE} > /boot/refind_linux.conf"
     # Tempo de espera do boot
     #timeout 10
 
@@ -385,11 +388,11 @@ function configurar_sistema() {
     #_chuser "localectl set-x11-keymap \"$KEYBOARD_LAYOUT\""
     
     _msg info 'Sistema instalado com sucesso!'
-    _msg info 'Reiniciando o computador'
+    _msg info 'Reinicie o computador'
     
     sleep 3 && umount -R /mnt
     # swpoff -L SWAP
-    reboot
+    # reboot
 }
 
 # Chamada das Funções
