@@ -59,7 +59,8 @@ readonly ARCH_ENTRIE="'"Default Boot"' \"rw root=${HD}2\""
 # Pacotes extras
 readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs 
 network-manager-applet google-chrome spotify playerctl visual-studio-code-bin 
-telegram-desktop"
+telegram-desktop p7zip zip unzip unrar brisk-menu-git ttf-iosevka-term-ss09 ttf-ubuntu-font-family mate-tweak compton 
+lightdm-webkit2-greeter lightdm-webkit-theme-aether"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -357,7 +358,7 @@ function configurar_sistema() {
     #_chroot "systemctl enable vboxservice.service" &> /dev/null
     
     # DE
-    (_chroot "pacman -S mate --needed --noconfirm" &> /dev/null) &
+    (_chroot "pacman -S mate mate-power-manager engrampa mate-calc mozo mate-applets pcmanfm-gtk3--needed --noconfirm" &> /dev/null) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o Desktop Environment (MATE):" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
