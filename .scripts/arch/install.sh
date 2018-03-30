@@ -60,7 +60,7 @@ readonly ARCH_ENTRIE="'"Default Boot"' \"rw root=${HD}2\""
 readonly PKG_EXTRA="bash-completion xf86-input-libinput xdg-user-dirs 
 network-manager-applet google-chrome spotify playerctl visual-studio-code-bin 
 telegram-desktop p7zip zip unzip unrar brisk-menu-git ttf-iosevka-term-ss09 ttf-ubuntu-font-family mate-tweak compton 
-lightdm-webkit2-greeter lightdm-webkit-theme-aether"
+lightdm-webkit2-greeter lightdm-webkit-theme-aether openbox obconf lxappearance ttf-ms-fonts nitrogen"
 
 #===============================================================================
 #----------------------------------FUNÇÕES--------------------------------------
@@ -166,7 +166,7 @@ function iniciar() {
     # ARRUMAR
     _msg info 'Procurando o servidor mais rápido.'
     pacman -Sy reflector --needed --noconfirm &> /dev/null
-    reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist 1> /dev/null
+    reflector --country Brazil --verbose --latest 10 --sort rate --save /etc/pacman.d/mirrorlist 1> /dev/null
     # sed -n '/^## Brazil/ {n;p}' /etc/pacman.d/mirrorlist >/etc/pacman.d/mirrorlist.backup
     # rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup >/etc/pacman.d/mirrorlist
 }
@@ -283,7 +283,7 @@ function configurar_sistema() {
     # Hora
     _msg info "Configurando o horário para a região ${TIMEZONE}."
     _chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
-    _chroot "hwclock --systohc --utc"
+    _chroot "hwclock --systohc --localtime"
     _chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
 
     # Multilib
@@ -292,7 +292,7 @@ function configurar_sistema() {
     
     _msg info 'Adicionando o servidor mais rápido.'
      _chroot "pacman -Sy reflector --needed --noconfirm" &> /dev/null
-     _chroot "reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist" 1> /dev/null
+     _chroot "reflector --country Brazil --verbose --latest 10 --sort rate --save /etc/pacman.d/mirrorlist" 1> /dev/null
 
     _msg info 'Populando as chaves dos respositórios.'
     _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
@@ -317,7 +317,7 @@ function configurar_sistema() {
 
     _msg info "Definindo a senha do usuário ${MAGENTA}Root${SEMCOR}."
     _chroot "echo root:${ROOT_PASSWD} | chpasswd"
-
+   
     # Bootloader
     _msg info 'Instalando o bootloader.'
     #_chroot "bootctl install" 2> /dev/null
@@ -325,7 +325,7 @@ function configurar_sistema() {
     #_chroot "echo -e \"$ARCH_ENTRIE\" > /boot/loader/entries/arch.conf"
     _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" 1> /dev/null
-    _chroot "mkrlconf"
+    #_chroot "mkrlconf"
     _chroot "echo -e ${ARCH_ENTRIE} > /boot/refind_linux.conf"
     # Tempo de espera do boot
     #timeout 10
@@ -358,7 +358,7 @@ function configurar_sistema() {
     #_chroot "systemctl enable vboxservice.service" &> /dev/null
     
     # DE
-    (_chroot "pacman -S mate mate-power-manager engrampa mate-calc mozo mate-applets pcmanfm-gtk3--needed --noconfirm" &> /dev/null) &
+    (_chroot "pacman -S mate mate-power-manager engrampa mate-calc mozo mate-applets caja --needed --noconfirm" &> /dev/null) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o Desktop Environment (MATE):" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
@@ -377,16 +377,14 @@ function configurar_sistema() {
     _chuser "cd /home/${MY_USER} && git clone https://aur.archlinux.org/trizen.git && 
              cd /home/${MY_USER}/trizen && makepkg -si --noconfirm && 
              rm -Rf /home/${MY_USER}/trizen" &> /dev/null
+             
+    # Dotfiles do Github
+    _msg info 'Clonando os dotfiles.'
+    _chuser "https://github.com/andreluizs/dotfiles.git ." 1> /dev/null
 
     _msg info "Instalando pacotes extras"
     _chuser "trizen -S ${PKG_EXTRA} --needed --noconfirm" &> /dev/null
     _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update" &> /dev/null
-    
-    #_msg info 'Sincronizando a hora.'
-    #_chuser "timedatectl set-ntp true"
-
-    #_msg info "Definindo o teclado para: $KEYBOARD_LAYOUT."
-    #_chuser "localectl set-x11-keymap \"$KEYBOARD_LAYOUT\""
     
     _msg info 'Sistema instalado com sucesso!'
     _msg info 'Reinicie o computador'
