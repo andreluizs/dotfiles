@@ -41,7 +41,7 @@ HOST=${HOST:-"arch-note"}
 
 # Tamanho das partições em MB
 BOOT_SIZE=${BOOT_SIZE:-512}
-SWAP_SIZE=${SWAP_SIZE:-4096}
+SWAP_SIZE=${SWAP_SIZE:-8192}
 ROOT_SIZE=${ROOT_SIZE:-51200}
 
 # Configurações da Região
@@ -52,36 +52,46 @@ readonly NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.a
 FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
 # Entradas do Bootloader
-readonly ARCH_ENTRIE="\\\"Default Boot\\\" \\\"rw root=${HD}2\\\""
+readonly ARCH_ENTRIE="\\\"Arch Linux\\\" \\\"rw root=${HD}2 acpi_backlight=none quiet splash\\\""
 
 # Video
 readonly DISPLAY_SERVER="xorg-server xorg-xinit xorg-xprop xorg-xbacklight xorg-xdpyinfo xorg-xrandr"
-readonly VGA_INTEL="intel-ucode mesa xf86-video-intel lib32-mesa vulkan-intel"
+readonly VGA_INTEL="mesa xf86-video-intel lib32-mesa vulkan-intel"
 readonly VGA_VBOX="virtualbox-guest-utils virtualbox-guest-modules-arch"
 
 # Pacotes extras
-readonly PKG_EXTRA=("bash-completion" "xf86-input-libinput" "xdg-user-dirs" "vim"
+readonly PKG_EXTRA=("zsh" "zsh-completions" "bash-completion" "xf86-input-libinput" "xdg-user-dirs" "vim"
                     "network-manager-applet" "google-chrome" "playerctl" "visual-studio-code-bin"
-                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar"
-                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "ttf-ms-fonts" "compton"
-                    "jdk8" "intellij-idea-ultimate-edition" 
-                    "pamac-aur-git" "adapta-gtk-theme" "hardcode-tray-git")
+                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx"
+                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "compton"
+                    "jdk8" "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" 
+                    "papirus-icon-theme-git" "arc-gtk-theme-git" "bibata-cursor-theme"
+                    "virtualbox" "virtualbox-host-modules-arch" "linux-headers"
+                    "intellij-idea-ultimate-edition-jre" "intellij-idea-ultimate-edition" 
+                    "spotify" "hardcode-tray-git" )
+
+readonly PKG_EXTRA_VM=("zsh" "zsh-completions" "bash-completion" "xf86-input-libinput" "xdg-user-dirs" "vim"
+                    "network-manager-applet" "google-chrome" "playerctl" "visual-studio-code-bin"
+                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx"
+                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "compton"
+                    "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" "bibata-cursor-theme"
+                    "papirus-icon-theme-git" "arc-gtk-theme-git")
 
 # Desktop Environment's
 readonly DE_MATE="mate mate-power-manager engrampa mate-calc mozo mate-applets caja"
 readonly DE_MATE_EXTRA="brisk-menu-git mate-tweak"
 readonly DE_XFCE="xfce4 xfce4-goodies"
-readonly DE_XFCE_EXTRA="file-roller"
+readonly DE_XFCE_EXTRA="file-roller xfce4-whiskermenu-plugin alacarte thunar-volman thunar-archive-plugin gvfs"
 
 # Window Manager's
 #readonly WM_I3=
 #readonly WM_I3_EXTRA=
 readonly WM_OPENBOX="openbox obconf"
-readonly WM_OPENBOX_EXTRA="nitrogen lxappearance termite"
+readonly WM_OPENBOX_EXTRA="nitrogen lxappearance"
 
 # Display Manager
-readonly DM="lightdm lightdm-webkit2-greeter"
-# readonly DM_THEME=
+readonly DM="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings lightdm-slick-greeter lightdm-settings light-locker"
+readonly SLICK_CONF="[Greeter]\\\nshow-a11y=false\\\nshow-keyboard=false\\\ndraw-grid=false\\\nbackground=/usr/share/backgrounds/xfce/xfce-blue.jpg\\\nactivate-numlock=true"
 
 
 #===============================================================================
@@ -117,34 +127,6 @@ function _spinner(){
         printf "\\b\\b\\b\\b\\b\\b"
     done
 }
-
-function _ler_info_usuario(){
-    _msg quest 'Informe o nome completo do usuário: '
-    read -re MY_USER_NAME
-    MY_USER_NAME=${MY_USER_NAME:='André Luiz'}
-
-    _msg quest 'Informe o nick do úsuario: '
-    read -re MY_USER
-    MY_USER=${MY_USER:='andre'}
-
-    _msg quest "Informe o password para $MY_USER_NAME:\\n"
-    read -rs MY_USER_PASSWD
-    MY_USER_PASSWD=${MY_USER_PASSWD:='andre'}
-
-    _msg quest "Informe o password para Root:\\n"
-    read -rs ROOT_PASSWD
-    ROOT_PASSWD=${ROOT_PASSWD:='root'}
-
-    _msg quest "Informe o device em que o sistema será instalado (${HD}): "
-    read -re HD
-    HD=${HD:='/dev/sda'}
-
-    _msg quest "Informe o nome da maquina: "
-    read -re HOST
-    HOST=${HOST:='archlinux'}
-}
-
-
 
 function bem_vindo() {
     echo -en "${NEGRITO}"
@@ -248,6 +230,7 @@ function instalar_sistema() {
 }
 
 function configurar_sistema() {
+
     _msg info "${NEGRITO}Entrando no novo sistema.${SEMCOR}"
     _msg info 'Configurando o teclado e o idioma para pt_BR.'
     _chroot "echo -e \"KEYMAP=br-abnt2\\nFONT=\\nFONT_MAP=\" > /etc/vconsole.conf"
@@ -281,14 +264,6 @@ function configurar_sistema() {
     _msg info 'Populando as chaves dos respositórios.'
     _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
 
-    # Rede
-    _msg info "Configurando o nome da maquina para: ${MAGENTA}$HOST${SEMCOR}."
-    _chroot "echo \"$HOST\" > /etc/hostname"
-
-    _msg info 'Instalando o NetworkManager.'
-    _chroot "pacman -S networkmanager --needed --noconfirm" 1> /dev/null
-    _chroot "systemctl enable NetworkManager" 2> /dev/null
-
     # Usuario
     _msg info "Criando o usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
     _chroot "useradd -m -g users -G wheel -c \"$MY_USER_NAME\" -s /bin/bash $MY_USER"
@@ -301,29 +276,43 @@ function configurar_sistema() {
 
     _msg info "Definindo a senha do usuário ${MAGENTA}Root${SEMCOR}."
     _chroot "echo root:${ROOT_PASSWD} | chpasswd"
+
+    _msg info "Configurando o nome da maquina para: ${MAGENTA}$HOST${SEMCOR}."
+    _chroot "echo \"$HOST\" > /etc/hostname"
+
+     # Rede
+    (_chroot "pacman -S networkmanager --needed --noconfirm" 1> /dev/null
+    _chroot "systemctl enable NetworkManager" 2> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o NetworkManager:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
    
     # Bootloader
-    _msg info 'Instalando o bootloader.'
-    _chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
+    (_chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" &> /dev/null
-    _chroot "echo ${ARCH_ENTRIE} > /boot/refind_linux.conf" &> /dev/null
+    _chroot "echo ${ARCH_ENTRIE} > /boot/refind_linux.conf" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o bootloader:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     # Xorg
-    _msg info 'Instalando o display server.'
-    _chroot "pacman -S ${DISPLAY_SERVER} --needed --noconfirm" &> /dev/null
+    (_chroot "pacman -S ${DISPLAY_SERVER} --needed --noconfirm" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o display server:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
     
     # Drive de video
-    _msg info 'Instalando o drive de video.'
-    #_chroot "pacman -S ${VGA_INTEL} --needed --noconfirm" &> /dev/null
-    _chroot "pacman -S ${VGA_VBOX} --needed --noconfirm" 1> /dev/null
+    (
+        _chroot "pacman -S ${VGA_INTEL} --needed --noconfirm" &> /dev/null
+        #_chroot "pacman -S ${VGA_VBOX} --needed --noconfirm" 1> /dev/null
+    ) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o drive de video:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
      # AUR 
-    _msg info 'Instalando o gerenciador de pacotes do AUR.'
-    _chroot "pacman -S git --needed --noconfirm" &> /dev/null
+    (_chroot "pacman -S git --needed --noconfirm" &> /dev/null
     _chuser "cd /home/${MY_USER} && git clone https://aur.archlinux.org/trizen.git && 
              cd /home/${MY_USER}/trizen && makepkg -si --noconfirm && 
-             rm -rf /home/${MY_USER}/trizen" &> /dev/null
-    _chroot "mount -o remount,size=10G,noatime /tmp"
+             rm -rf /home/${MY_USER}/trizen" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o Trizen:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
     
     # DE
     (_chuser "trizen -S ${DE_XFCE} ${DE_XFCE_EXTRA} --needed --noconfirm" &> /dev/null) &
@@ -331,31 +320,39 @@ function configurar_sistema() {
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     # WM
-    _msg info 'Instalando o window manager.'
-    _chuser "trizen -S ${WM_OPENBOX} ${WM_OPENBOX_EXTRA} --needed --noconfirm" &> /dev/null
+    (_chuser "trizen -S ${WM_OPENBOX} ${WM_OPENBOX_EXTRA} --needed --noconfirm" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o window manager:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+
 
     # Display Manager
-    _msg info 'Instalando o display manager.'
-    _chuser "trizen -S ${DM} --needed --noconfirm" &> /dev/null
-    _chroot "sed -i '/^#greeter-session/c \greeter-session=lightdm-webkit2-greeter' /etc/lightdm/lightdm.conf"
-    _chroot "systemctl enable lightdm.service" &> /dev/null
+    (_chuser "trizen -S ${DM} --needed --noconfirm" &> /dev/null
+    _chroot "sed -i '/^#greeter-session/c \greeter-session=slick-greeter' /etc/lightdm/lightdm.conf"
+    _chroot "echo -e ${SLICK_CONF} > /etc/lightdm/slick-greeter.conf"
+    _chroot "systemctl enable lightdm.service" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o display manager:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+
 
     # Drive de som
-    _msg info 'Instalando as bibliotecas de audio.'
-    _chroot "pacman -S alsa-utils alsa-oss alsa-lib pulseaudio --needed --noconfirm" &> /dev/null
+    (_chroot "pacman -S alsa-utils alsa-oss alsa-lib pulseaudio --needed --noconfirm" &> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote de audio:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     # Dotfiles do Github
-    _msg info 'Clonando os dotfiles.'
+    #_msg info 'Clonando os dotfiles.'
     _chuser "cd /home/${MY_USER} && rm -rf .[^.] .??* &&
              git clone https://github.com/andreluizs/dotfiles.git ." &> /dev/null
 
     # Pacotes extras.
-    (for i in "${PKG_EXTRA[@]}"; do
-        _chuser "trizen -S ${i} --needed --noconfirm" &> /dev/null
-    done) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando os pacotes extras:" $! 
-    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+    _msg info "${NEGRITO}Instalando pacote extras:${SEMCOR}"
+    for i in "${PKG_EXTRA[@]}"; do
+        (_chuser "export TMPDIR=/home/${MY_USER} && trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
+        _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote ${i}:" $! 
+        echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+    done 
     _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update"
+    _chroot "archlinux-java set java-8-jdk"
     
     _msg info 'Sistema instalado com sucesso!'
     _msg aten 'Retire a midia do computador e logo em seguida reinicie a máquina.'
