@@ -60,34 +60,41 @@ readonly VGA_INTEL="mesa xf86-video-intel lib32-mesa vulkan-intel"
 readonly VGA_VBOX="virtualbox-guest-utils virtualbox-guest-modules-arch"
 
 # Pacotes extras
-readonly PKG_EXTRA=("zsh" "zsh-completions" "bash-completion" "xf86-input-libinput" "xdg-user-dirs" "vim"
+readonly PKG_EXTRA=("bash-completion" "powerline" "powerline-fonts" "xf86-input-libinput" "xdg-user-dirs" "vim"
                     "network-manager-applet" "google-chrome" "playerctl" "visual-studio-code-bin"
-                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx"
-                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "compton"
-                    "jdk8" "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" 
+                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx" "gksu"
+                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "compton" "pavucontrol"
+                    "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" "plank"
                     "papirus-icon-theme-git" "arc-gtk-theme-git" "bibata-cursor-theme"
                     "virtualbox" "virtualbox-host-modules-arch" "linux-headers"
-                    "intellij-idea-ultimate-edition-jre" "intellij-idea-ultimate-edition" 
                     "spotify" "hardcode-tray-git" )
 
-readonly PKG_EXTRA_VM=("zsh" "zsh-completions" "bash-completion" "xf86-input-libinput" "xdg-user-dirs" "vim"
-                    "network-manager-applet" "google-chrome" "playerctl" "visual-studio-code-bin"
-                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx"
-                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "compton"
-                    "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" "bibata-cursor-theme"
-                    "papirus-icon-theme-git" "arc-gtk-theme-git")
+readonly PKG_DEV=("jdk8" "intellij-idea-ultimate-edition-jre" "intellij-idea-ultimate-edition")
+
 
 # Desktop Environment's
+
+# MATE 
 readonly DE_MATE="mate mate-power-manager engrampa mate-calc mozo mate-applets caja"
 readonly DE_MATE_EXTRA="brisk-menu-git mate-tweak"
+
+# XFCE
 readonly DE_XFCE="xfce4 xfce4-goodies"
 readonly DE_XFCE_EXTRA="file-roller xfce4-whiskermenu-plugin alacarte thunar-volman thunar-archive-plugin gvfs"
+readonly XFCE_CONF = "xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Super_L -n -t string -s \"xfce4-popup-whiskermenu\" &&
+xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Print -n -t string -s \"xfce4-screenshooter --fullscreen\" && 
+xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Alt>Print\" -n -t string -s \"xfce4-screenshooter --window\" && 
+xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Ctrl>Print\" -n -t string -s \"xfce4-screenshooter --region\""
 
 # Window Manager's
-#readonly WM_I3=
-#readonly WM_I3_EXTRA=
-readonly WM_OPENBOX="openbox obconf"
-readonly WM_OPENBOX_EXTRA="nitrogen lxappearance"
+
+# I3wm
+readonly WM_I3="i3-gaps"
+readonly WM_I3_EXTRA="rofi dunst polybar"
+
+# Openbox
+readonly WM_OPENBOX="openbox obconf openbox-themes obmenu"
+readonly WM_OPENBOX_EXTRA="nitrogen lxappearance-obconf tint2 tty-clock"
 
 # Display Manager
 readonly DM="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings lightdm-slick-greeter lightdm-settings light-locker"
@@ -258,8 +265,8 @@ function configurar_sistema() {
     _chroot "sed -i '/multilib\\]/,+1  s/^#//' /etc/pacman.conf"
     
     _msg info 'Adicionando o servidor mais rápido.'
-     _chroot "pacman -Sy reflector --needed --noconfirm" &> /dev/null
-     _chroot "reflector --country Brazil --verbose --latest 10 --sort rate --save /etc/pacman.d/mirrorlist" &> /dev/null
+    _chroot "pacman -Sy reflector --needed --noconfirm" &> /dev/null
+    _chroot "reflector --country Brazil --verbose --latest 10 --sort rate --save /etc/pacman.d/mirrorlist" &> /dev/null
 
     _msg info 'Populando as chaves dos respositórios.'
     _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
@@ -282,8 +289,8 @@ function configurar_sistema() {
 
      # Rede
     (_chroot "pacman -S networkmanager --needed --noconfirm" 1> /dev/null
-    _chroot "systemctl enable NetworkManager" 2> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o NetworkManager:" $! 
+    _chroot "systemctl enable NetworkManager.service" 2> /dev/null) &
+    _spinner "${VERDE}[I]${SEMCOR} Instalando o networkmanager:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
    
     # Bootloader
@@ -342,7 +349,8 @@ function configurar_sistema() {
     # Dotfiles do Github
     #_msg info 'Clonando os dotfiles.'
     _chuser "cd /home/${MY_USER} && rm -rf .[^.] .??* &&
-             git clone https://github.com/andreluizs/dotfiles.git ." &> /dev/null
+             git clone --bare https://github.com/andreluizs/dotfiles.git $HOME/.dotfiles
+             && dotfiles checkout"
 
     # Pacotes extras.
     _msg info "${NEGRITO}Instalando pacote extras:${SEMCOR}"
