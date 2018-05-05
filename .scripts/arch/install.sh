@@ -63,7 +63,8 @@ readonly VGA_VBOX="virtualbox-guest-utils virtualbox-guest-modules-arch"
 readonly PKG_EXTRA=("bash-completion" "powerline" "powerline-fonts" "xf86-input-libinput" "xdg-user-dirs" "vim"
                     "network-manager-applet" "google-chrome" "playerctl" "visual-studio-code-bin"
                     "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx" "gksu"
-                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "compton" "pavucontrol"
+                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "ttf-font-awesome" "ttf-monoid" "ttf-fantasque-sans-mono" 
+                    "compton" "pavucontrol"
                     "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" "plank"
                     "papirus-icon-theme-git" "arc-gtk-theme-git" "bibata-cursor-theme"
                     "virtualbox" "virtualbox-host-modules-arch" "linux-headers"
@@ -71,12 +72,7 @@ readonly PKG_EXTRA=("bash-completion" "powerline" "powerline-fonts" "xf86-input-
 
 readonly PKG_DEV=("jdk8" "intellij-idea-ultimate-edition-jre" "intellij-idea-ultimate-edition")
 
-
-# Desktop Environment's
-
-# MATE 
-readonly DE_MATE="mate mate-power-manager engrampa mate-calc mozo mate-applets caja"
-readonly DE_MATE_EXTRA="brisk-menu-git mate-tweak"
+# Desktop Environment
 
 # XFCE
 readonly DE_XFCE="xfce4 xfce4-goodies"
@@ -86,15 +82,21 @@ xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Print -n -t string 
 xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Alt>Print\" -n -t string -s \"xfce4-screenshooter --window\" && 
 xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Ctrl>Print\" -n -t string -s \"xfce4-screenshooter --region\""
 
+# Section "InputClass"
+#    Identifier "MeuTouchpad"
+#    MatchIsTouchpad "on"
+#    Driver "libinput"
+#    Option "Tapping" "on"
+#    Option "ReverseScrolling" "true"
+# EndSection
+
 # Window Manager's
 
 # I3wm
-readonly WM_I3="i3-gaps"
-readonly WM_I3_EXTRA="rofi dunst polybar"
+readonly WM_I3="i3-gaps i3lock rofi dunst polybar nitrogen tty-clock lxappearance"
 
 # Openbox
-readonly WM_OPENBOX="openbox obconf openbox-themes obmenu"
-readonly WM_OPENBOX_EXTRA="nitrogen lxappearance-obconf tint2 tty-clock"
+readonly WM_OPENBOX="openbox obconf openbox-themes obmenu lxappearance-obconf tint2"
 
 # Display Manager
 readonly DM="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings lightdm-slick-greeter lightdm-settings light-locker"
@@ -307,8 +309,11 @@ function configurar_sistema() {
     
     # Drive de video
     (
-        _chroot "pacman -S ${VGA_INTEL} --needed --noconfirm" &> /dev/null
-        #_chroot "pacman -S ${VGA_VBOX} --needed --noconfirm" 1> /dev/null
+        if [ "$(systemd-detect-virt)" = "none" ]; then
+            _chroot "pacman -S ${VGA_INTEL} --needed --noconfirm" &> /dev/null
+        else
+            _chroot "pacman -S ${VGA_VBOX} --needed --noconfirm" 1> /dev/null
+        fi
     ) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o drive de video:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
@@ -322,12 +327,15 @@ function configurar_sistema() {
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
     
     # DE
-    (_chuser "trizen -S ${DE_XFCE} ${DE_XFCE_EXTRA} --needed --noconfirm" &> /dev/null) &
+    (
+        _chuser "trizen -S ${DE_XFCE} ${DE_XFCE_EXTRA} --needed --noconfirm" &> /dev/null
+        _chuser "${XFCE_CONF}"
+    ) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o desktop environment:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     # WM
-    (_chuser "trizen -S ${WM_OPENBOX} ${WM_OPENBOX_EXTRA} --needed --noconfirm" &> /dev/null) &
+    (_chuser "trizen -S ${WM_I3} --needed --noconfirm" &> /dev/null) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o window manager:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
@@ -355,12 +363,23 @@ function configurar_sistema() {
     # Pacotes extras.
     _msg info "${NEGRITO}Instalando pacote extras:${SEMCOR}"
     for i in "${PKG_EXTRA[@]}"; do
-        (_chuser "export TMPDIR=/home/${MY_USER} && trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
+        (_chuser "trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
         _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote ${i}:" $! 
         echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
     done 
     _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update"
-    _chroot "archlinux-java set java-8-jdk"
+    
+    # Pacotes para desenvolvedor.
+    if [ "$(systemd-detect-virt)" = "none" ]; then
+        _chroot "mount -o remount,size=4G,noatime /tmp"
+        _msg info "${NEGRITO}Instalando aplicativos para desenvolvimento:${SEMCOR}"
+        for i in "${PKG_DEV[@]}"; do
+            (_chuser "trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
+            _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote ${i}:" $! 
+            echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+        done 
+        _chroot "archlinux-java set java-8-jdk"
+    fi
     
     _msg info 'Sistema instalado com sucesso!'
     _msg aten 'Retire a midia do computador e logo em seguida reinicie a máquina.'

@@ -39,8 +39,10 @@ height = 35
 background = ${colors.background}
 foreground = ${colors.foreground}
 
-font-0 = Iosevka:Bold:size=12;4
-font-1 = FontAwesome:size=14;4
+font-0 = Zekton:Bold:size=12;4
+font-1 = "Font Awesome 5 Free:style=Regular:pixelsize=14;4"
+font-2 = "Font Awesome 5 Free:style=Solid:pixelsize=14;4"
+font-3 = "Font Awesome 5 Brands:pixelsize=14;4"
 
 modules-left = i3
 modules-center = xwindow
@@ -58,8 +60,10 @@ bottom = true
 background = ${colors.background}
 foreground = ${colors.foreground}
 
-font-0 = Iosevka:Bold:size=12;4
-font-1 = FontAwesome:size=14;4
+font-0 = Zekton:Bold:size=12;4
+font-1 = "Font Awesome 5 Free:style=Regular:pixelsize=14;4"
+font-2 = "Font Awesome 5 Free:style=Solid:pixelsize=14;4"
+font-3 = "Font Awesome 5 Brands:pixelsize=14;4"
 
 modules-left = spotify
 modules-center = cpu memoria temperatura wifi
@@ -87,15 +91,15 @@ index-sort = true
 strip-wsnumbers = true
 
 ws-icon-1 = "1;"
-ws-icon-2 = "2;"
-ws-icon-3 = "3;"
-ws-icon-4 = "4;"
+ws-icon-2 = "2;"
+ws-icon-3 = "3;"
+ws-icon-4 = "4;"
 ws-icon-5 = "5;"
 ws-icon-6 = "6;"
 ws-icon-7 = "7;"
 ws-icon-8 = "8;"
-ws-icon-9 = "9;"
-ws-icon-0 = "10;"
+ws-icon-9 = "9;"
+ws-icon-0 = "10;"
 ws-icon-default = ""
 
 label-focused = "%icon%"
