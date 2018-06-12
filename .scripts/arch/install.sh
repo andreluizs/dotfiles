@@ -61,11 +61,14 @@ readonly VGA_VBOX="virtualbox-guest-utils virtualbox-guest-modules-arch"
 
 # Pacotes extras
 readonly PKG_EXTRA=("bash-completion" "powerline" "powerline-fonts" "xf86-input-libinput" "xdg-user-dirs" "vim"
-                    "network-manager-applet" "google-chrome" "playerctl" "visual-studio-code-bin"
+                    "google-chrome" "playerctl" "visual-studio-code-bin"
                     "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx" "gksu"
-                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "ttf-font-awesome" "ttf-monoid" "ttf-fantasque-sans-mono" 
-                    "compton" "pavucontrol"
+                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "ttf-font-awesome" 
+                    "ttf-monoid" "ttf-fantasque-sans-mono" "ttf-roboto"
+                    "compton" "pavucontrol" "conky" "jq" "remmina" "rdesktop" "remmina-plugin-rdesktop"
                     "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" "plank"
+                    "lib32-gtk-engine-murrine" "xfce-theme-greybird" "elementary-xfce-icons"
+                    "flat-remix-git" "faenza-icon-theme" "pop-icon-theme-git" "mpv"
                     "papirus-icon-theme-git" "arc-gtk-theme-git" "bibata-cursor-theme"
                     "virtualbox" "virtualbox-host-modules-arch" "linux-headers"
                     "spotify" "hardcode-tray-git" )
@@ -76,9 +79,8 @@ readonly PKG_DEV=("jdk8" "intellij-idea-ultimate-edition-jre" "intellij-idea-ult
 
 # XFCE
 readonly DE_XFCE="xfce4 xfce4-goodies"
-readonly DE_XFCE_EXTRA="file-roller xfce4-whiskermenu-plugin alacarte thunar-volman thunar-archive-plugin gvfs"
-readonly XFCE_CONF = "xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Super_L -n -t string -s \"xfce4-popup-whiskermenu\" &&
-xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Print -n -t string -s \"xfce4-screenshooter --fullscreen\" && 
+readonly DE_XFCE_EXTRA="file-roller xfce4-whiskermenu-plugin alacarte thunar-volman thunar-archive-plugin gvfs xfce4-dockbarx-plugin"
+readonly XFCE_CONF = "xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Print -n -t string -s \"xfce4-screenshooter --fullscreen\" && 
 xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Alt>Print\" -n -t string -s \"xfce4-screenshooter --window\" && 
 xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Ctrl>Print\" -n -t string -s \"xfce4-screenshooter --region\""
 
@@ -93,7 +95,7 @@ xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Ctrl>Print\" -n 
 # Window Manager's
 
 # I3wm
-readonly WM_I3="i3-gaps i3lock rofi dunst polybar nitrogen tty-clock lxappearance"
+readonly WM_I3="i3-gaps i3lock rofi mlocate dunst polybar nitrogen tty-clock lxappearance"
 
 # Openbox
 readonly WM_OPENBOX="openbox obconf openbox-themes obmenu lxappearance-obconf tint2"
@@ -290,7 +292,7 @@ function configurar_sistema() {
     _chroot "echo \"$HOST\" > /etc/hostname"
 
      # Rede
-    (_chroot "pacman -S networkmanager --needed --noconfirm" 1> /dev/null
+    (_chroot "pacman -S networkmanager network-manager-applet networkmanager-pptp --needed --noconfirm" 1> /dev/null
     _chroot "systemctl enable NetworkManager.service" 2> /dev/null) &
     _spinner "${VERDE}[I]${SEMCOR} Instalando o networkmanager:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
