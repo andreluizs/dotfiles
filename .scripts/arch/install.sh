@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 #===============================================================================
 #
-#          FILE: install.sh
+#   FILE: install.sh
 #
-#         USAGE: ./install.sh
+#   USAGE: ./install.sh
 #
 #   DESCRIPTION: Script para realizar a instalação do Arch Linux.
 #
-#        AUTHOR: André Luiz dos Santos (andreluizs@live.com),
-#       CREATED: 03/2018
-#      REVISION: 1.0.0b
+#   AUTHOR: André Luiz dos Santos (andreluizs@live.com),
+#   CREATED: 03/2018
+#   LAST UPDATE: 06/2018
+#   REVISION: 1.0.0b
 #===============================================================================
 set -o errexit
 set -o pipefail
@@ -28,21 +29,21 @@ readonly NEGRITO='\e[1m'
 readonly SEMCOR='\e[0m'
 
 # Usuário
-MY_USER=${MY_USER:-'andre'}
-MY_USER_NAME=${MY_USER_NAME:-'André Luiz dos Santos'}
-MY_USER_PASSWD=${MY_USER_PASSWD:-'andre'}
+MY_USER=${MY_USER:-'mamutal91'}
+MY_USER_NAME=${MY_USER_NAME:-'Alexandre Rangel'}
+MY_USER_PASSWD=${MY_USER_PASSWD:-'mamutal91'}
 ROOT_PASSWD=${ROOT_PASSWD:-'root'}
 
 # HD
 HD=${HD:-'/dev/sda'}
 
 # Nome da maquina
-HOST=${HOST:-"arch-note"}
+HOST=${HOST:-"ArchLinux"}
 
 # Tamanho das partições em MB
 BOOT_SIZE=${BOOT_SIZE:-512}
-SWAP_SIZE=${SWAP_SIZE:-8192}
-ROOT_SIZE=${ROOT_SIZE:-51200}
+SWAP_SIZE=${SWAP_SIZE:-4096}
+ROOT_SIZE=${ROOT_SIZE:-102400}
 
 # Configurações da Região
 readonly KEYBOARD_LAYOUT="br abnt2"
@@ -51,46 +52,44 @@ readonly TIMEZONE="America/Sao_Paulo"
 readonly NTP="NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org2.arch.pool.ntp.org 3.arch.pool.ntp.org
 FallbackNTP=FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
 
-# Entradas do Bootloader
-readonly ARCH_ENTRIE="\\\"Arch Linux\\\" \\\"rw root=${HD}2 acpi_backlight=none quiet splash\\\""
-
 # Video
 readonly DISPLAY_SERVER="xorg-server xorg-xinit xorg-xprop xorg-xbacklight xorg-xdpyinfo xorg-xrandr"
 readonly VGA_INTEL="mesa xf86-video-intel lib32-mesa vulkan-intel"
 readonly VGA_VBOX="virtualbox-guest-utils virtualbox-guest-modules-arch"
 
-# Pacotes extras
-readonly PKG_EXTRA=("bash-completion" "powerline" "powerline-fonts" "xf86-input-libinput" "xdg-user-dirs" "vim"
-                    "google-chrome" "playerctl" "visual-studio-code-bin"
-                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx" "gksu"
-                    "ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "ttf-font-awesome" 
-                    "ttf-monoid" "ttf-fantasque-sans-mono" "ttf-roboto"
-                    "compton" "pavucontrol" "conky" "jq" "remmina" "rdesktop" "remmina-plugin-rdesktop"
-                    "pamac-aur-git" "gtk-engine-murrine" "adapta-gtk-theme" "plank"
-                    "lib32-gtk-engine-murrine" "xfce-theme-greybird" "elementary-xfce-icons"
-                    "flat-remix-git" "faenza-icon-theme" "pop-icon-theme-git" "mpv"
-                    "papirus-icon-theme-git" "arc-gtk-theme-git" "bibata-cursor-theme"
-                    "virtualbox" "virtualbox-host-modules-arch" "linux-headers"
+# Pacotes
+readonly PKG_EXTRA=("bash-completion" "powerline" "powerline-fonts" "xdg-user-dirs" "vim"
+                    "google-chrome" "playerctl"  "network-manager-applet" "networkmanager-pptp"
+                    "telegram-desktop" "p7zip" "zip" "unzip" "unrar" "wget" "numlockx"
+                     "polkit"
+                    "compton" "pavucontrol" "remmina" "rdesktop" "remmina-plugin-rdesktop"
+                    "pamac-aur" "gtk-engine-murrine" "lib32-gtk-engine-murrine"   "plank"
+                     "mpv"
                     "spotify" "hardcode-tray-git" )
 
-readonly PKG_DEV=("jdk8" "intellij-idea-ultimate-edition-jre" "intellij-idea-ultimate-edition")
+readonly PKG_DEV=("jdk8" "intellij-idea-ultimate-edition-jre" "intellij-idea-ultimate-edition"
+                                    "visual-studio-code-bin"
+                                    "virtualbox" "virtualbox-host-modules-arch" "linux-headers")
+
+readonly PKG_THEME=("adapta-gtk-theme" "flat-remix-git"  "pop-icon-theme-git" 
+                                          "papirus-icon-theme-git" "arc-gtk-theme-git" "bibata-cursor-theme")
+
+readonly PKG_FONT=("ttf-iosevka-term-ss09" "ttf-ubuntu-font-family" "ttf-font-awesome" 
+                                       "ttf-monoid" "ttf-fantasque-sans-mono")
+
+readonly PKG_NOTE=( "xf86-input-libinput" )
 
 # Desktop Environment
 
 # XFCE
 readonly DE_XFCE="xfce4 xfce4-goodies"
-readonly DE_XFCE_EXTRA="file-roller xfce4-whiskermenu-plugin alacarte thunar-volman thunar-archive-plugin gvfs xfce4-dockbarx-plugin"
-readonly XFCE_CONF = "xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Print -n -t string -s \"xfce4-screenshooter --fullscreen\" && 
-xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Alt>Print\" -n -t string -s \"xfce4-screenshooter --window\" && 
-xfconf-query -c xfce4-keyboard-shortcuts -p \"/commands/custom/<Ctrl>Print\" -n -t string -s \"xfce4-screenshooter --region\""
+readonly DE_XFCE_EXTRA="file-roller xfce4-whiskermenu-plugin alacarte thunar-volman thunar-archive-plugin gvfs xfce4-dockbarx-plugin xfce-theme-greybird elementary-xfce-icons xfce-polkit-git"
 
-# Section "InputClass"
-#    Identifier "MeuTouchpad"
-#    MatchIsTouchpad "on"
-#    Driver "libinput"
-#    Option "Tapping" "on"
-#    Option "ReverseScrolling" "true"
-# EndSection
+# Plasma
+readonly DE_KDE="plasma-meta  sddm sddm-kcm"
+
+# Deepin
+readonly DE_DEEPIN="deepin deepin-extra"
 
 # Window Manager's
 
@@ -106,15 +105,15 @@ readonly SLICK_CONF="[Greeter]\\\nshow-a11y=false\\\nshow-keyboard=false\\\ndraw
 
 
 #===============================================================================
-#----------------------------------FUNÇÕES--------------------------------------
+#------------------------------------------------------------FUNÇÕES------------------------------------------------------------------
 #===============================================================================
 
 function _msg() {
     case $1 in
-    info)       echo -e "${VERDE}[I]${SEMCOR} $2" ;;
-    aten)       echo -e "${AMARELO}[A]${SEMCOR} $2" ;;
-    erro)       echo -e "${VERMELHO}[X]${SEMCOR} $2" ;;
-    quest)      echo -ne "${AZUL}[?]${SEMCOR} $2" ;;
+    info)       echo -e "${VERDE}>${SEMCOR} $2" ;;
+    aten)       echo -e "${AMARELO}>${SEMCOR} $2" ;;
+    erro)       echo -e "${VERMELHO}>${SEMCOR} $2" ;;
+    quest)      echo -ne "${AZUL}>${SEMCOR} $2" ;;
     esac
 }
 
@@ -218,6 +217,8 @@ function montar_particao() {
     _msg info 'Montando a partição /boot.'
     mkdir -p /mnt/boot/efi
     mount "${HD}1" /mnt/boot/efi 1> /dev/null
+    #mkdir -p /mnt/boot
+    #mount "${HD}1" /mnt/boot 1> /dev/null
 
     _msg info 'Montando a partição /home.'
     mkdir /mnt/home
@@ -232,7 +233,7 @@ function montar_particao() {
 function instalar_sistema() {
 
     (pacstrap /mnt base base-devel &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o sistema base:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o sistema base:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
 
     _msg info "Gerando o fstab."
@@ -240,42 +241,47 @@ function instalar_sistema() {
 
 }
 
-function configurar_sistema() {
-
-    _msg info "${NEGRITO}Entrando no novo sistema.${SEMCOR}"
+function configurar_idioma(){
     _msg info 'Configurando o teclado e o idioma para pt_BR.'
     _chroot "echo -e \"KEYMAP=br-abnt2\\nFONT=\\nFONT_MAP=\" > /etc/vconsole.conf"
     _chroot "sed -i '/pt_BR/,+1 s/^#//' /etc/locale.gen"
     _chroot "locale-gen" 1> /dev/null
     _chroot "echo LANG=pt_BR.UTF-8 > /etc/locale.conf"
     _chroot "export LANG=pt_BR.UTF-8"
+}
 
-    # Swapfile
+function configurar_hora(){
+    _msg info "Configurando o horário para a região ${TIMEZONE}."
+    _chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
+    _chroot "hwclock --systohc --localtime"
+    _chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
+}
+
+function criar_swapfile(){
     _msg info "Criando o swapfile com ${MAGENTA}${SWAP_SIZE}MB${SEMCOR}."
     _chroot "fallocate -l \"${SWAP_SIZE}M\" /swapfile" 1> /dev/null
     _chroot "chmod 600 /swapfile" 1> /dev/null
     _chroot "mkswap /swapfile" 1> /dev/null
     _chroot "swapon /swapfile" 1> /dev/null
     _chroot "echo -e /swapfile none swap defaults 0 0 >> /etc/fstab"
+}
 
-    # Hora
-    _msg info "Configurando o horário para a região ${TIMEZONE}."
-    _chroot "ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
-    _chroot "hwclock --systohc --localtime"
-    _chroot "echo -e \"$NTP\" >> /etc/systemd/timesyncd.conf"
-
-    # Multilib
+function configurar_pacman(){
     _msg info 'Habilitando o repositório multilib.'
-    _chroot "sed -i '/multilib\\]/,+1  s/^#//' /etc/pacman.conf"
+    _chroot "sed -i '/multilib]/,+1  s/^#//' /etc/pacman.conf"
     
     _msg info 'Adicionando o servidor mais rápido.'
     _chroot "pacman -Sy reflector --needed --noconfirm" &> /dev/null
     _chroot "reflector --country Brazil --verbose --latest 10 --sort rate --save /etc/pacman.d/mirrorlist" &> /dev/null
 
+    _msg info 'Atualizando o sistema.'
+    _chroot "pacman -Syu --noconfirm" &> /dev/null
+
     _msg info 'Populando as chaves dos respositórios.'
     _chroot "pacman-key --init && pacman-key --populate archlinux" &> /dev/null
+}
 
-    # Usuario
+function criar_usuario(){
     _msg info "Criando o usuário ${MAGENTA}$MY_USER_NAME${SEMCOR}."
     _chroot "useradd -m -g users -G wheel -c \"$MY_USER_NAME\" -s /bin/bash $MY_USER"
 
@@ -290,99 +296,146 @@ function configurar_sistema() {
 
     _msg info "Configurando o nome da maquina para: ${MAGENTA}$HOST${SEMCOR}."
     _chroot "echo \"$HOST\" > /etc/hostname"
+}
 
-     # Rede
-    (_chroot "pacman -S networkmanager network-manager-applet networkmanager-pptp --needed --noconfirm" 1> /dev/null
+function instalar_rede(){
+    (_chroot "pacman -S networkmanager --needed --noconfirm" 1> /dev/null
     _chroot "systemctl enable NetworkManager.service" 2> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o networkmanager:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o networkmanager:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
-   
-    # Bootloader
+}
+
+function instalar_bootloader_refind(){
+    local arch_entrie="\\\"Arch Linux\\\" \\\"rw root=${HD}2 quiet splash\\\""
     (_chroot "pacman -S refind-efi --needed --noconfirm" 1> /dev/null
     _chroot "refind-install --usedefault \"${HD}1\"" &> /dev/null
-    _chroot "echo ${ARCH_ENTRIE} > /boot/refind_linux.conf" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o bootloader:" $! 
+    _chroot "echo ${arch_entrie} > /boot/refind_linux.conf" &> /dev/null) &
+    _spinner "${VERDE}>${SEMCOR} Instalando o rEFInd bootloader:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-    # Xorg
+function instalar_bootloader_grub(){
+    _msg info "Instalando o Grub bootloader"
+    _chroot "pacman -S grub efibootmgr --needed --noconfirm" 1> /dev/null
+    _chroot "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB"
+     if [ "$(systemd-detect-virt)" != "none" ]; then
+        _chroot "mkdir /boot/EFI/BOOT"
+        _chroot "mv /boot/EFI/arch/grubx64.efi /boot/EFI/BOOT/bootx64.efi"
+     fi
+     _chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+}
+
+function instalar_display_server(){
     (_chroot "pacman -S ${DISPLAY_SERVER} --needed --noconfirm" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o display server:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o display server:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
-    
-    # Drive de video
-    (
+}
+
+function instalar_video(){
+     (
         if [ "$(systemd-detect-virt)" = "none" ]; then
             _chroot "pacman -S ${VGA_INTEL} --needed --noconfirm" &> /dev/null
         else
             _chroot "pacman -S ${VGA_VBOX} --needed --noconfirm" 1> /dev/null
         fi
     ) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o drive de video:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o drive de video:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-     # AUR 
-    (_chroot "pacman -S git --needed --noconfirm" &> /dev/null
+function instalar_gerenciador_aur(){
+     (_chroot "pacman -S git --needed --noconfirm" &> /dev/null
     _chuser "cd /home/${MY_USER} && git clone https://aur.archlinux.org/trizen.git && 
              cd /home/${MY_USER}/trizen && makepkg -si --noconfirm && 
              rm -rf /home/${MY_USER}/trizen" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o Trizen:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o Trizen:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
-    
-    # DE
-    (
-        _chuser "trizen -S ${DE_XFCE} ${DE_XFCE_EXTRA} --needed --noconfirm" &> /dev/null
-        _chuser "${XFCE_CONF}"
-    ) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o desktop environment:" $! 
+}
+
+function instalar_desktop_environment(){
+     (_chuser "trizen -S ${DE_KDE} --needed --noconfirm" &> /dev/null
+      _chroot "systemctl enable sddm.service" &> /dev/null
+     ) &
+    _spinner "${VERDE}>${SEMCOR} Instalando o desktop environment:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-    # WM
-    (_chuser "trizen -S ${WM_I3} --needed --noconfirm" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o window manager:" $! 
-    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+function instalar_window_manager(){
+   (_chuser "trizen -S ${WM_I3} --needed --noconfirm" &> /dev/null) &
+   _spinner "${VERDE}>${SEMCOR} Instalando o window manager:" $! 
+   echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-
-    # Display Manager
+function instalar_display_manager(){
     (_chuser "trizen -S ${DM} --needed --noconfirm" &> /dev/null
     _chroot "sed -i '/^#greeter-session/c \greeter-session=slick-greeter' /etc/lightdm/lightdm.conf"
     _chroot "echo -e ${SLICK_CONF} > /etc/lightdm/slick-greeter.conf"
     _chroot "systemctl enable lightdm.service" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o display manager:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o display manager:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-
-    # Drive de som
+function instalar_som(){
     (_chroot "pacman -S alsa-utils alsa-oss alsa-lib pulseaudio --needed --noconfirm" &> /dev/null) &
-    _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote de audio:" $! 
+    _spinner "${VERDE}>${SEMCOR} Instalando o pacote de audio:" $! 
     echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-    # Dotfiles do Github
-    #_msg info 'Clonando os dotfiles.'
-    _chuser "cd /home/${MY_USER} && rm -rf .[^.] .??* &&
-             git clone --bare https://github.com/andreluizs/dotfiles.git $HOME/.dotfiles
-             && dotfiles checkout"
+function clonar_dotfiles(){
+    (
+        _chuser "cd /home/${MY_USER} && rm -rf .[^.] .??*" &> /dev/null
+        _chuser "cd /home/${MY_USER} && git clone --bare https://github.com/andreluizs/dotfiles.git /home/${MY_USER}/.dotfiles" &> /dev/null
+        _chuser "cd /home/${MY_USER} && /usr/bin/git --git-dir=/home/${MY_USER}/.dotfiles/ --work-tree=/home/${MY_USER} checkout" &> /dev/null
+    ) &
+    _spinner "${VERDE}>${SEMCOR} Clonando os dotfiles:" $! 
+    echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+}
 
-    # Pacotes extras.
-    _msg info "${NEGRITO}Instalando pacote extras:${SEMCOR}"
+function instalar_pacotes_extras(){
+     _msg info "${NEGRITO}Instalando pacotes extras:${SEMCOR}"
     for i in "${PKG_EXTRA[@]}"; do
         (_chuser "trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
-        _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote ${i}:" $! 
+        _spinner "${VERDE}>${SEMCOR} Instalando o pacote ${i}:" $! 
         echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
     done 
-    _chuser "export LANG=pt_BR.UTF-8 && xdg-user-dirs-update"
+    _chuser "xdg-user-dirs-update"
+}
+
+function instalar_pacotes_desenvolvedor(){
+    _chroot "mount -o remount,size=4G,noatime /tmp"
+    _msg info "${NEGRITO}Instalando aplicativos para desenvolvimento:${SEMCOR}"
+    for i in "${PKG_DEV[@]}"; do
+         (_chuser "trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
+        _spinner "${VERDE}>${SEMCOR} Instalando o pacote ${i}:" $! 
+        echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
+    done 
+    _chroot "archlinux-java set java-8-jdk"
+}
+
+function configurar_sistema() {
+
+    _msg info "${NEGRITO}Entrando no novo sistema.${SEMCOR}"
+    configurar_idioma
+    configurar_hora
+    criar_swapfile
+    configurar_pacman
+    criar_usuario
+    instalar_rede
+    instalar_bootloader_refind
+    #instalar_bootloader_grub
+    instalar_display_server
+    instalar_video
+    instalar_gerenciador_aur
+    instalar_desktop_environment
+    #instalar_window_manager
+    #instalar_display_manager
     
-    # Pacotes para desenvolvedor.
-    if [ "$(systemd-detect-virt)" = "none" ]; then
-        _chroot "mount -o remount,size=4G,noatime /tmp"
-        _msg info "${NEGRITO}Instalando aplicativos para desenvolvimento:${SEMCOR}"
-        for i in "${PKG_DEV[@]}"; do
-            (_chuser "trizen -S ${i} --needed --noconfirm --quiet --noinfo" &> /dev/null) &
-            _spinner "${VERDE}[I]${SEMCOR} Instalando o pacote ${i}:" $! 
-            echo -ne "${VERMELHO}[${SEMCOR}${VERDE}100%${SEMCOR}${VERMELHO}]${SEMCOR}\\n"
-        done 
-        _chroot "archlinux-java set java-8-jdk"
-    fi
-    
+    #if [ "$(systemd-detect-virt)" = "none" ]; then
+        #instalar_pacotes_extras
+        #instalar_pacotes_desenvolvedor
+        #clonar_dotfiles
+    #fi
+
     _msg info 'Sistema instalado com sucesso!'
     _msg aten 'Retire a midia do computador e logo em seguida reinicie a máquina.'
     umount -R /mnt &> /dev/null
