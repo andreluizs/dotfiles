@@ -1,0 +1,275 @@
+;--------------------------------------------;
+;------------------- CORES ------------------;
+;--------------------------------------------;
+[colors]
+background = #00122d
+#foreground =  #c4b7c5
+foreground = #eee
+transparente = rgba(255, 255, 255, .221)
+preto = #1b1d1e
+branco = #ffffff
+pink = #d90e79
+verde =#98de00 
+rosa = #fd5d77
+azul_turquesa = #03cbca
+ardosia_escuro = #473b6b
+pessego = #fecf87
+cinza = #c1baba
+vermelho = #FF0000
+amarelo = #e4b226
+ouro = #564b00
+
+;--------------------------------------------;
+;--------------- CONFIGURAÇÕES --------------;
+;--------------------------------------------;
+[settings]
+screenchange-reload = true
+
+;--------------------------------------------;
+;----------- CONFIGURAÇÕES GLOBAIS ----------;
+;--------------------------------------------;
+[global/wm]
+margin-top = 5
+margin-bottom = 5
+
+
+;--------------------------------------------;
+;-------------- BARRA SUPERIOR --------------;
+;--------------------------------------------;
+[bar/top]
+monitor = ${env:MONITOR:eDP1}
+width = 100%
+height = 30
+dpi = ${xrdb:Xft.dpi}
+background = ${colors.transparente}
+foreground = ${colors.foreground}
+
+font-0 = "Monoid:Retina:size=10;5"
+font-1 = "Font Awesome 5 Free:style=Regular:pixelsize=12;4"
+font-2 = "Font Awesome 5 Free:style=Solid:pixelsize=12;4"
+font-3 = "Font Awesome 5 Brands:pixelsize=12;4"
+
+modules-left = i3
+modules-center = xwindow
+modules-right = volume brilho bateria hora tray 
+
+tray-position = right
+tray-padding = 2
+tray-background = ${colors.transparente}
+tray-scale = 1.0
+tray-maxsize = 20
+# tray-transparent = true
+
+;--------------------------------------------;
+;-------------- BARRA INFERIOR --------------;
+;--------------------------------------------;
+[bar/bot]
+monitor = ${env:MONITOR:eDP1}
+width = 100%
+height = 30
+wm-restack = i3
+bottom = true
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+font-0 = Zekton:Bold:size=11:4
+font-1 = "Font Awesome 5 Free:style=Regular:pixelsize=13;4"
+font-2 = "Font Awesome 5 Free:style=Solid:pixelsize=13;4"
+font-3 = "Font Awesome 5 Brands:pixelsize=13;4"
+
+modules-left = spotify
+modules-center = cpu memoria temperatura wifi
+modules-right = 
+
+tray-position = right
+tray-padding = 2
+tray-background = ${colors.background}
+tray-scale = 1.0
+tray-maxsize = 22
+
+;--------------------------------------------;
+;------------------ MODULOS -----------------;
+;--------------------------------------------;
+# Modulo do titulo da janela
+[module/xwindow]
+type = internal/xwindow
+label = %title:0:40:...%
+
+# Modulo: Workspace i3-gaps
+[module/i3]
+type = internal/i3
+index-sort = true
+# format-padding = 2
+strip-wsnumbers = true
+
+ws-icon-1 = "1;"
+ws-icon-2 = "2;"
+ws-icon-3 = "3;"
+ws-icon-4 = "4;"
+ws-icon-5 = "5;"
+ws-icon-6 = "6;"
+ws-icon-7 = "7;"
+ws-icon-8 = "8;"
+ws-icon-9 = "9;"
+ws-icon-0 = "10;"
+ws-icon-default = ""
+
+label-focused = "%icon%"
+label-focused-foreground = ${colors.branco}
+label-focused-padding = 1
+
+label-unfocused = "%icon%"
+label-unfocused-foreground = ${colors.cinza}
+label-unfocused-padding = 1
+
+label-urgent = "%icon%"
+label-urgent-foreground = ${colors.amarelo}
+label-urgent-padding = 1
+
+# Modulo: CPU.
+[module/cpu]
+type = internal/cpu
+interval = 1
+format = <label>
+format-padding = 2
+label = "%{F#fecf87}%{F-} %percentage%%"
+
+# Modulo: Memória.
+[module/memoria]
+type = internal/memory
+interval = 1
+format = <label>
+format-padding = 2
+label = "%{F#435adb}%{F-} %gb_used%"
+
+# Modulo: Temperatura.
+[module/temperatura]
+type = internal/temperature
+interval = 1
+thermal-zone = 0
+warn-temperature = 80
+format = <ramp> <label>
+format-padding = 2
+format-warn = <ramp> <label-warn>
+format-warn-padding = 2
+label = %temperature%
+label-warn = %temperature%
+label-warn-foreground = ${colors.amarelo}
+
+ramp-0 = ""
+ramp-1 = ""
+ramp-2 = ""
+ramp-3 = ""
+ramp-4 = ""
+
+# Modulo: Brilho da tela.
+[module/brilho]
+type = internal/xbacklight
+format = <label>
+format-padding = 1
+label =  %percentage%%
+label-foreground = ${colors.pessego}
+
+# Modulo: Volume
+[module/volume]
+type = internal/volume
+format-volume = <label-volume>
+format-padding = 1
+label-volume =  %percentage%%
+label-volume-foreground = ${colors.cinza}
+format-muted-prefix = " "
+label-muted = "Mute"
+
+# Modulo: Wi-fi
+[module/wifi]
+type = internal/network
+interface = wlp2s0
+interval = 3.0
+format-connected= <label-connected>
+format-padding = 1
+label-connected = "%{F#98de00} %{F-}%downspeed%  %{F#e4b226}%{F-} %upspeed%"
+format-disconnected = <label-disconnected>
+label-disconnected = " ..."
+label-disconnected-foreground = ${colors.pink}
+ramp-signal-0 = ""
+ramp-signal-1 = ""
+ramp-signal-2 = ""
+ramp-signal-3 = ""
+ramp-signal-4 = ""
+ramp-signal-foreground = ${colors.pink}
+
+# Modulo: Rede
+[module/ethernet]
+type = internal/network
+interface = enp1s0
+interval = 3.0
+format-padding = 1
+format-connected-prefix = " "
+format-connected-prefix-foreground = ${colors.pink}
+label-connected = " %local_ip%"
+format-disconnected = 
+
+# Modulo: Hora.
+[module/hora]
+type = internal/date
+interval = 1
+format-padding = 1
+time = "%H:%M:%S"
+time-alt = "%d/%m/%Y"
+label = " %time%"
+
+# Modulo: Bateria
+[module/bateria]
+type = internal/battery
+battery = BAT1
+adapter = ADP1
+full-at = 99
+format-padding = 1
+
+format-charging = <animation-charging> <label-charging>
+format-charging-foreground = ${colors.verde}
+format-charging-prefix = " "
+
+format-discharging = <ramp-capacity> <label-discharging>
+
+format-full-prefix = " "
+format-full-prefix-foreground = ${colors.verde}
+
+ramp-capacity-0 = "%{F#FF0000}%{F-}"
+ramp-capacity-1 = "%{F#FF0000}%{F-}"
+ramp-capacity-2 = "%{F#e4b226}%{F-}"
+ramp-capacity-3 = "%{F#98de00}%{F-}"
+ramp-capacity-4 = "%{F#98de00}%{F-}"
+
+animation-charging-0 = "%{F#FF0000}%{F-}"
+animation-charging-1 = "%{F#FF0000}%{F-}"
+animation-charging-2 = "%{F#e4b226}%{F-}"
+animation-charging-3 = "%{F#98de00}%{F-}"
+animation-charging-4 = "%{F#98de00}%{F-}"
+animation-charging-framerate = 350
+
+# Modulo: Menu sair
+[module/power_menu]
+type = custom/menu
+format-foreground = ${colors.pink}
+format = <label-toggle> <menu>
+format-padding = 2
+format-margin = 0
+menu-0-0 = "  Desligar | "
+menu-0-0-exec = shutdown now
+menu-0-1 = "  Reiniciar | "
+menu-0-1-exec = reboot
+menu-0-2 = "  Sair | "
+menu-0-2-exec = i3-msg exit
+menu-0-3 =  "  Cancelar "
+label-open = 
+label-close =
+
+# Modulo: Spotify
+[module/spotify]
+type = custom/script
+format-prefix = " "
+format-padding = 2
+format-prefix-foreground = ${colors.verde}
+interval = 1
+exec = $HOME/.config/polybar/scripts/music

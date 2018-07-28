@@ -1,0 +1,245 @@
+[colors]
+background = ${xrdb:background:#222}
+background-alt = ${xrdb:color8}
+foreground = ${xrdb:foreground:#222}
+foreground-alt = ${xrdb:color14}
+primary = ${xrdb:color3}
+secondary = ${xrdb:color6}
+alert = #bd2c40
+
+[bar/top]
+monitor = "eDP1"
+dpi = ${xrdb:Xft.dpi}
+include-file = ~/.config/polybar/top-bar
+modules-left = hostname ip xwindow
+modules-center = i3
+modules-right = uptime memory battery powermenu
+
+[bar/top-second]
+monitor = "eDP1"
+dpi = ${xrdb:Xft.dpi}
+include-file = ~/.config/polybar/top-second-bar
+modules-left = screencast volume brilho spotify
+modules-center = date
+modules-right = netstat wlan eth
+
+[module/uptime]
+type = custom/script
+exec = uptime|awk '{print $2 " " $3 " " $4}' |cut -d ',' -f -1
+interval = 6
+format-prefix = " "
+format-prefix-foreground = ${colors.primary}
+format-foreground = ${colors.foreground}
+format-padding = 1
+
+[module/netstat]
+type = internal/network
+interface = wlp2s0
+interval = 3.0
+label-connected = %{F#ff0000} %{F-}%upspeed% %{F#00ff00} %{F-}%downspeed%
+
+[module/hostname]
+type = custom/script
+interval = 256
+format = "<label> "
+format-prefix = "  "
+format-prefix-foreground = ${colors.secondary}
+format-padding = 0
+exec = echo "$(uname -n) $(uname -r)"
+
+[module/ip]
+type = custom/script
+interval = 2
+format = "<label>"
+format-prefix = "ip: "
+format-prefix-foreground = ${colors.primary}
+format-padding = 1
+exec = hostname --ip-address
+exec-if = ping -c 1 google.com.br
+
+[module/xwindow]
+type = internal/xwindow
+label = " %title:0:30:...%"
+label-foreground = ${colors.foreground}
+
+[module/i3]
+type = internal/i3
+index-sort = true
+strip-wsnumbers = true
+
+ws-icon-1 = "1;1:"
+ws-icon-2 = "2;2:"
+ws-icon-3 = "3;3:"
+ws-icon-4 = "4;4:"
+ws-icon-5 = "5;5:"
+ws-icon-6 = "6;6:"
+ws-icon-7 = "7;7:"
+ws-icon-8 = "8;8:"
+ws-icon-9 = "9;9:"
+ws-icon-0 = "10;10:"
+ws-icon-default = ""
+
+label-focused = "%icon%"
+label-focused-foreground = ${colors.foreground}
+label-focused-padding = 1
+
+label-unfocused = "%icon%"
+label-unfocused-foreground = ${colors.background-alt}
+label-unfocused-padding = 1
+
+label-urgent = "%icon%"
+label-urgent-foreground = ${colors.alert}
+label-urgent-padding = 1
+
+[module/memory]
+type = internal/memory
+interval = 2
+format-prefix = " "
+format-prefix-foreground = ${colors.secondary}
+label = %percentage_used%%
+format-padding = 1
+
+[module/wlan]
+type = internal/network
+interface = wlp2s0
+interval = 3.0
+format-connected = <label-connected>
+format-connected-padding = 0
+label-connected = "%essid% - %{F#aca074}%signal%% %{F-}"
+format-connected-prefix = " "
+format-connected-prefix-foreground = ${colors.secondary}
+format-disconnected = "wlan: off"
+format-disconnected-foreground = ${colors.primary}
+format-disconnected-padding = 0
+label-disconnected-foreground = ${colors.secondary}
+ramp-signal-1 = ""
+ramp-signal-0 = ""
+ramp-signal-2 = ""
+ramp-signal-3 = ""
+ramp-signal-4 = ""
+ramp-signal-foreground = ${colors.foreground-alt}
+
+[module/eth]
+type = internal/network
+interface = enp1s0
+interval = 3.0
+format-connected = <label-connected>
+format-connected-prefix = "eth: "
+format-connected-prefix-foreground = ${colors.secondary}
+label-connected = "on"
+format-disconnected = "eth off"
+
+[module/date]
+type = internal/date
+interval = 5
+date = " %A, %d de %B "
+date-alt = " %d/%m/%Y"
+time = %H:%M
+time-alt = %H:%M
+label = %date% %time%
+format-prefix = "____["
+format-prefix-foreground = ${colors.primary}
+format-suffix = " ]____"
+format-suffix-foreground = ${colors.primary}
+
+[module/volume]
+type = internal/volume
+format-volume = "<label-volume>"
+label-volume = " %percentage%%"
+label-volume-foreground = ${colors.secondary}
+format-muted-prefix-foreground = ${colors.primary}
+format-muted-prefix = ""
+label-muted-foreground = ${colors.primary}
+label-muted = "0%"
+
+[module/spotify]
+type = custom/script
+format-prefix = " "
+format-prefix-foreground = ${colors.secondary}
+interval = 1
+exec = $HOME/.local/bin/spotify
+
+[module/brilho]
+type = internal/xbacklight
+format = <label>
+label = " %percentage%%"
+label-foreground = ${xrdb:color16}
+
+[module/battery]
+type = internal/battery
+battery = BAT1
+adapter = ADP1
+full-at = 98
+format-charging = <animation-charging> <label-charging>
+format-discharging = <ramp-capacity> <label-discharging>
+format-full-prefix = " "
+format-full-prefix-foreground = ${colors.primary}
+format-full-suffix = " "
+ramp-capacity-0 = 
+ramp-capacity-1 = 
+ramp-capacity-2 = 
+ramp-capacity-foreground = ${colors.foreground-alt}
+animation-charging-0 = 
+animation-charging-1 = 
+animation-charging-2 = 
+animation-charging-foreground = ${colors.foreground-alt}
+animation-charging-framerate = 750
+
+[module/powermenu]
+type = custom/menu
+
+expand-right = false
+
+format-spacing = 1
+
+label-open = "  "
+label-open-foreground = ${colors.secondary}
+label-close =  cancelar
+label-close-foreground = ${colors.secondary}
+label-separator = |
+label-separator-foreground = ${colors.foreground-alt}
+
+menu-0-0 = reiniciar
+menu-0-0-exec = menu-open-1
+menu-0-1 = desligar
+menu-0-1-exec = menu-open-2
+menu-0-2 = logoff
+menu-0-2-exec = menu-open-3
+
+menu-1-0 = sim
+menu-1-0-exec = sudo reboot
+menu-1-1 = não
+menu-1-1-exec = menu-open-0
+
+menu-2-0 = sim
+menu-2-0-exec = sudo poweroff
+menu-2-1 = não
+menu-2-1-exec = menu-open-0
+
+menu-3-0 = sim
+menu-3-0-exec = i3-msg exit
+menu-3-1 = não
+menu-3-1-exec = menu-open-0
+
+;----------------------------------------------------------
+;			S C R E E N C A S T
+;----------------------------------------------------------
+[module/screencast]
+type = custom/script
+interval = 1
+label = %output%
+click-left = termite -e ~/.local/bin/screencast.sh &
+click-right = ~/.local/bin/screencast.sh clear &
+exec = ~/.local/bin/screencast.sh status
+tail = true
+
+[settings]
+screenchange-reload = true
+;compositing-background = xor
+;compositing-background = screen
+;compositing-foreground = source
+;compositing-border = over
+
+[global/wm]
+margin-top = 5
+margin-bottom = 5

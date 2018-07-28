@@ -1,0 +1,28 @@
+! ------------------------------------------------------------------------------
+! Import Colour from ~/.xrdb
+! ------------------------------------------------------------------------------
+
+! #include ".xrdb/rofi/nord"
+#include ".xrdb/colors/gruvbox"
+
+! ------------------------------------------------------------------------------
+! Xft Font Configuration
+! ------------------------------------------------------------------------------
+
+
+Xft.dpi: 116
+Xft.antialias: true
+Xft.hinting: true
+Xft.rgba: rgb
+Xft.autohint: false
+Xft.hintstyle: hintslight
+Xft.lcdfilter: lcddefault
+
+
+rofi.lines:                         6
+rofi.color-enabled:                 true
+rofi.separator-style:               none 
+rofi.width:                         33
+rofi.line-padding:                  6
+rofi.hide-scrollbar:                True
+rofi.columns:                       1
