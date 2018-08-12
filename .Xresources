@@ -19,10 +19,11 @@ Xft.hintstyle: hintslight
 Xft.lcdfilter: lcddefault
 
 
-rofi.lines:                         6
+rofi.lines:                         15
 rofi.color-enabled:                 true
 rofi.separator-style:               none 
-rofi.width:                         33
-rofi.line-padding:                  6
+rofi.width:                         50
+rofi.line-padding:                  10
 rofi.hide-scrollbar:                True
-rofi.columns:                       1
+rofi.columns:                       2
+rofi.show-icons:		    True

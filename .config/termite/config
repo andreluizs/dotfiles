@@ -2,7 +2,7 @@
 audible_bell = false
 clickable_url = true
 dynamic_title = true
-font = Liberation Mono 11
+font = Iosevka Term SS09 10
 fullscreen = true
 #mouse_autohide = true
 scrollback_lines = 1000
