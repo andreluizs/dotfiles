@@ -11,8 +11,9 @@ alert = #bd2c40
 monitor = "eDP1"
 dpi = ${xrdb:Xft.dpi}
 include-file = ~/.config/polybar/top-bar
-modules-left = hostname ip xwindow
-modules-center = i3
+# modules-left = hostname ip xwindow
+modules-left = bspwm
+modules-center = xwindow
 modules-right = uptime memory battery powermenu
 
 [bar/top-second]
@@ -61,6 +62,42 @@ exec-if = ping -c 1 google.com.br
 type = internal/xwindow
 label = " %title:0:30:...%"
 label-foreground = ${colors.foreground}
+
+[module/bspwm]
+type = internal/bspwm
+
+ws-icon-0 = web;
+ws-icon-1 = chat;
+ws-icon-2 = term; 
+ws-icon-3 = syst; 
+ws-icon-4 = media;
+ws-icon-default = 
+
+pin-workspaces = true
+
+format = <label-state> <label-mode>
+
+label-focused = %icon%
+label-focused-foreground = #ffffff
+label-focused-underline = #4a4e64
+label-focused-font = 3
+label-focused-padding = 1
+
+label-occupied = %icon%
+label-occupied-foreground = #f9f9f9
+label-occupied-underline = #63f9f9f9
+label-occupied-font = 3
+label-occupied-padding = 1
+
+label-urgent = %icon%
+label-urgent-underline = #ff8e91
+label-urgent-font = 3
+label-urgent-padding = 1
+
+label-empty = %icon%
+label-empty-foreground = #63f9f9f9
+label-empty-font = 3
+label-empty-padding = 1
 
 [module/i3]
 type = internal/i3
@@ -217,7 +254,7 @@ menu-2-1 = não
 menu-2-1-exec = menu-open-0
 
 menu-3-0 = sim
-menu-3-0-exec = i3-msg exit
+menu-3-0-exec = bspc quit
 menu-3-1 = não
 menu-3-1-exec = menu-open-0
 
