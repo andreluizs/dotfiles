@@ -11,12 +11,12 @@ alert = #bd2c40
 monitor = "eDP1"
 dpi = ${xrdb:Xft.dpi}
 include-file = ~/.config/polybar/top-bar
-# modules-left = hostname ip xwindow
 modules-left = bspwm
-modules-center = xwindow
-modules-right = uptime memory battery powermenu
+modules-center = date
+modules-right = memory battery volume brilho powermenu
+height= 30
 
-[bar/top-second]
+[bar/bot]
 monitor = "eDP1"
 dpi = ${xrdb:Xft.dpi}
 include-file = ~/.config/polybar/top-second-bar
@@ -169,7 +169,7 @@ format-disconnected = "eth off"
 [module/date]
 type = internal/date
 interval = 5
-date = " %A, %d de %B "
+date = " %d/%m/%Y "
 date-alt = " %d/%m/%Y"
 time = %H:%M
 time-alt = %H:%M
@@ -182,10 +182,10 @@ format-suffix-foreground = ${colors.primary}
 [module/volume]
 type = internal/volume
 format-volume = "<label-volume>"
-label-volume = " %percentage%%"
+label-volume = " %percentage%% "
 label-volume-foreground = ${colors.secondary}
 format-muted-prefix-foreground = ${colors.primary}
-format-muted-prefix = ""
+format-muted-prefix = " "
 label-muted-foreground = ${colors.primary}
 label-muted = "0%"
 
@@ -199,7 +199,7 @@ exec = $HOME/.local/bin/spotify
 [module/brilho]
 type = internal/xbacklight
 format = <label>
-label = " %percentage%%"
+label = "  %percentage%% "
 label-foreground = ${xrdb:color16}
 
 [module/battery]

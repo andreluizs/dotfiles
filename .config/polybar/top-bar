@@ -1,28 +1,28 @@
-width = 100%
+width = 80%
 heigth = 0
-offset-x = 0
+offset-x = 10%
 offset-y = 0
-radius = 6.0
+radius = 0.0
 fixed-center = true
 background = ${colors.background}
 foreground = ${colors.foreground}
 line-size = 0
 line-color = #f00
-;border-bottom-size = 1
-;border-color = #892d2d
+border-bottom-size = 2
+border-color =${xrdb:color16}
 padding-left = 0
 padding-right = 1
 module-margin-left = 0
 module-margin-right = 0
-font-0 = "Iosevka Term SS09:pixelsize=10;1"
-font-1 = "Material Icons:antialias=true:size=10;2"
+font-0 = "Iosevka SS07:pixelsize=10;2"
+font-1 = "Material Icons:antialias=true:size=10;3"
 font-2 = "Font Awesome 5 Free:style=Regular:pixelsize=10;2"
 font-3 = "Font Awesome 5 Free:style=Solid:pixelsize=10;2"
 font-4 = "Font Awesome 5 Brands:pixelsize=10;2"
-; tray-position = right
+tray-position = right
 ; tray-padding = 2
 override-redirect = false
-wm-restack = i3
+wm-restack = bspwm
 cursor-click = pointer
 cursor-scroll = ns-resize
 separator = "%{F#555588}|%{F-}"
